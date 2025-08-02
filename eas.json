@@ -16,7 +16,7 @@
     },
     "apk": {
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "apk"
       }
     }
   },
