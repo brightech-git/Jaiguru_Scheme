@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
   welcomeText: {
     fontSize: scale(18),
     fontWeight: '500',
-    color: colors.gray,
+    color: colors.black,
     textAlign: 'center',
     marginTop: verticalScale(20),
     marginBottom: verticalScale(10),
@@ -47,7 +47,7 @@ export const styles = StyleSheet.create({
 
   subtitle: {
     fontSize: scale(14),
-    color: colors.gray,
+    color: colors.black,
     marginBottom: verticalScale(20),
     fontFamily: 'TrajanPro-Bold',
   },
@@ -149,7 +149,7 @@ export const styles = StyleSheet.create({
   },
 
   timerText: {
-    color: colors.gray,
+    color: colors.black ,
     fontSize: scale(14),
     fontFamily: 'TrajanPro-Bold',
   },

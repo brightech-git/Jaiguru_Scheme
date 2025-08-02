@@ -62,22 +62,22 @@ const HomeScreen = () => {
       label: 'Pay Dues',
       action: () => showToast('Coming soon')
     },
-    {
-      icon: 'wallet',
-      label: 'My Wallet',
-      action: () => showToast('Coming soon')
-    },
-    { icon: 'tag', label: 'Offers', action: () => showToast('Coming soon') },
-    {
-      icon: 'star-circle',
-      label: 'New Arrivals',
-      action: () => showToast('Coming soon')
-    },
-    {
-      icon: 'scale-balance',
-      label: 'Total Weight',
-      action: () => showToast('Coming soon')
-    },
+    // {
+    //   icon: 'wallet',
+    //   label: 'My Wallet',
+    //   action: () => showToast('Coming soon')
+    // },
+    { icon: 'tag', label: 'Offers', action: () => navigation.navigate('OffersPage') },
+    // {
+    //   icon: 'star-circle',
+    //   label: 'New Arrivals',
+    //   action: () => showToast('Coming soon')
+    // },
+    // {
+    //   icon: 'scale-balance',
+    //   label: 'Total Weight',
+    //   action: () => showToast('Coming soon')
+    // },
     {
       icon: 'close-circle',
       label: 'Closed Accounts',
@@ -259,12 +259,12 @@ const HomeScreen = () => {
 
       {/* Floating Buttons */}
       <View style={styles.floatingButtons}>
-        <TouchableWithoutFeedback onPress={() => navigateTo('tel:9876543210')}>
+        <TouchableWithoutFeedback onPress={() => navigateTo('tel:9600972227')}>
           <View style={[styles.floatingIcon, { backgroundColor: '#4CAF50' }]}>
             <Icon name='phone' size={24} color='white' />
           </View>
         </TouchableWithoutFeedback>
-        <TouchableWithoutFeedback onPress={() => navigateTo('https://wa.me/917603905056')}>
+        <TouchableWithoutFeedback onPress={() => navigateTo('https://wa.me/9600972227')}>
           <View style={[styles.floatingIcon, { backgroundColor: '#25D366' }]}>
             <Icon name='whatsapp' size={24} color='white' />
           </View>

@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bold,
   },
   headerTitle: {
-    fontSize:scale(16),
+    fontSize:scale(18),
     color: colors.black,
     fontFamily: FontFamily.medium,
     // fontWeight: "bold",
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     paddingBottom: verticalScale(30),
   },
   sectionTitle: {
-    fontSize:scale (14),
+    fontSize:scale (16),
     fontFamily: FontFamily.semiBold,
     color: colors.black,
     marginTop: verticalScale(16),
@@ -104,11 +104,11 @@ const styles = StyleSheet.create({
      fontFamily:"TrajanPro-Bold"
   },
   text: {
-    fontSize: scale (12),
+    fontSize: scale (14),
     fontFamily: FontFamily.regular,
     color: colors.textDark,
     marginBottom: verticalScale(6),
     lineHeight: verticalScale(20),
-     fontFamily:"TrajanPro-Normal",
+     fontWeight: "normal"
   },
 });

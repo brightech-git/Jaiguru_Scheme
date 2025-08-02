@@ -19,6 +19,7 @@ import EditingProfile from './EditingProfile/EditingProfile'
 import PaymentHistory from './PaymentHistory/PaymentHistory'
 import PaymentDueScreen from './PaymentDue/PaymentDue'
 import PaymentPaidScreen from './PaymentPaidScreen/PaymentPaidScreen'
+import OffersPage from './Offers/Offer'
 
 export {
   MainLanding,
@@ -40,5 +41,6 @@ export {
   EditingProfile,
   PaymentHistory,
   PaymentDueScreen,
-  PaymentPaidScreen
+  PaymentPaidScreen,
+  OffersPage
 }

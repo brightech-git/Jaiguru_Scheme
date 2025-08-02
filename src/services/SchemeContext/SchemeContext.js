@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const SchemeContext = createContext();
@@ -8,25 +8,25 @@ export const SchemeProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchPhoneSearchData = async () => {
+  const fetchPhoneSearchData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
       const storedPhoneNumber = await AsyncStorage.getItem('userPhoneNumber');
+      console.log('Stored phone number:', storedPhoneNumber);
 
       if (!storedPhoneNumber) {
         throw new Error('No phone number found in storage');
       }
 
-      console.log('Fetching data for phone:', storedPhoneNumber);
-
+      // Fetch account list for this phone number
       const phoneResponse = await fetch(
         `https://akj.brightechsoftware.com/v1/api/account/phonesearch?phoneNo=${storedPhoneNumber}`,
         {
           method: 'GET',
           headers: {
-            Accept: 'application/json',
+            'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
         }
@@ -37,134 +37,100 @@ export const SchemeProvider = ({ children }) => {
       }
 
       const phoneJson = await phoneResponse.json();
-      console.log('Phone search response:', JSON.stringify(phoneJson, null, 2));
+      console.log('Phone search results:', phoneJson);
 
       if (!phoneJson || phoneJson.length === 0) {
         throw new Error('No accounts found for this phone number');
       }
 
-      const productPromises = phoneJson.map(async (item, index) => {
+      // Process each account in parallel
+      const productPromises = phoneJson.map(async (item) => {
         if (!item.regno || !item.groupcode) {
-          console.warn(`Skipping item ${index} - missing regno or groupcode:`, item);
+          console.warn('Skipping item - missing regno or groupcode:', item);
           return null;
         }
 
         try {
-          // Fetch account details
-          const accountRes = await fetch(
-            `https://akj.brightechsoftware.com/v1/api/account?regno=${item.regno}&groupcode=${item.groupcode}`,
-            {
-              method: 'GET',
-              headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-              },
-            }
-          );
+          // Fetch account details in parallel
+          const [accountRes, weightRes] = await Promise.all([
+            fetch(`https://akj.brightechsoftware.com/v1/api/account?regno=${item.regno}&groupcode=${item.groupcode}`),
+            fetch(`https://akj.brightechsoftware.com/v1/api/getAmountWeight?REGNO=${item.regno}&GROUPCODE=${item.groupcode}`)
+          ]);
 
-          // Fetch amount/weight details
-          const weightRes = await fetch(
-            `https://akj.brightechsoftware.com/v1/api/getAmountWeight?REGNO=${item.regno}&GROUPCODE=${item.groupcode}`,
-            {
-              method: 'GET',
-              headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-              },
-            }
-          );
-
-          if (!accountRes.ok) {
-            console.warn(`Account API failed for ${item.regno}-${item.groupcode}:`, accountRes.status);
+          if (!accountRes.ok || !weightRes.ok) {
+            console.warn(`Failed to fetch details for ${item.regno}-${item.groupcode}`);
             return null;
           }
 
-          if (!weightRes.ok) {
-            console.warn(`Weight API failed for ${item.regno}-${item.groupcode}:`, weightRes.status);
-            return null;
-          }
+          const [accountData, weightData] = await Promise.all([
+            accountRes.json(),
+            weightRes.json()
+          ]);
 
-          const accountData = await accountRes.json();
-          const weightData = await weightRes.json();
-
-          console.log(`Account data for ${item.regno}-${item.groupcode}:`, JSON.stringify(accountData, null, 2));
-          console.log(`Weight data for ${item.regno}-${item.groupcode}:`, JSON.stringify(weightData, null, 2));
-
-          // Normalize maturity date
+          // Process maturity date
           let maturityDate = item.maturitydate || item.maturityDate || accountData?.schemeSummary?.maturityDate;
-          console.log(`Raw maturity date for ${item.regno}-${item.groupcode}:`, maturityDate);
-
           if (maturityDate) {
             try {
-              let parsedDate;
-              if (typeof maturityDate === 'string') {
-                if (maturityDate.includes('-') && maturityDate.split('-').length === 3) {
-                  const [part1, part2, part3] = maturityDate.split('-');
-                  // Try DD-MM-YYYY
-                  parsedDate = new Date(`${part3}-${part2}-${part1}`);
-                  if (isNaN(parsedDate.getTime())) {
-                    // Try YYYY-MM-DD
-                    parsedDate = new Date(maturityDate);
-                  }
-                } else if (maturityDate.includes('/')) {
-                  const [part1, part2, part3] = maturityDate.split('/');
-                  // Try DD/MM/YYYY
-                  parsedDate = new Date(`${part3}-${part2}-${part1}`);
-                } else {
-                  parsedDate = new Date(maturityDate);
-                }
-              } else {
-                parsedDate = new Date(maturityDate);
-              }
-
+              // Try parsing different date formats
+              const parsedDate = new Date(maturityDate);
               if (isNaN(parsedDate.getTime())) {
-                console.warn(`Invalid maturity date for ${item.regno}-${item.groupcode}:`, maturityDate);
-                maturityDate = null;
+                // Try alternative formats if standard parsing fails
+                const parts = maturityDate.split(/[-/]/);
+                if (parts.length === 3) {
+                  // Try DD-MM-YYYY or DD/MM/YYYY
+                  const alternativeDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                  if (!isNaN(alternativeDate.getTime())) {
+                    maturityDate = alternativeDate.toISOString();
+                  } else {
+                    maturityDate = null;
+                  }
+                } else {
+                  maturityDate = null;
+                }
               } else {
                 maturityDate = parsedDate.toISOString();
               }
-            } catch (err) {
-              console.warn(`Error parsing maturity date for ${item.regno}-${item.groupcode}:`, err.message);
+            } catch (e) {
+              console.warn('Date parsing error:', e);
               maturityDate = null;
             }
-          } else {
-            console.log(`No maturity date found for ${item.regno}-${item.groupcode}`);
-            maturityDate = null;
           }
 
           // Determine status
-          const isActive = !maturityDate || new Date(maturityDate) > new Date();
-          const status = isActive ? 'Active' : 'Deactive';
+          const status = (!maturityDate || new Date(maturityDate) > new Date()) ? 'Active' : 'Inactive';
 
-          // Calculate progress percentage
+          // Calculate progress
           const totalInstallments = accountData?.schemeSummary?.instalment || 0;
           const paidInstallments = accountData?.schemeSummary?.schemaSummaryTransBalance?.insPaid || 0;
-          const progressPercentage = totalInstallments > 0 ? (paidInstallments / totalInstallments) * 100 : 0;
+          const progressPercentage = totalInstallments > 0 
+            ? Math.round((paidInstallments / totalInstallments) * 100)
+            : 0;
+
+          // Get weight data (handle both array and object responses)
+          const weightInfo = Array.isArray(weightData) ? weightData[0] : weightData;
 
           return {
             ...item,
-            amountWeight: Array.isArray(weightData) ? weightData[0] : weightData,
             accountDetails: accountData,
+            amountWeight: weightInfo,
             status,
-            progressPercentage: Math.round(progressPercentage),
-            schemeName: accountData?.schemeSummary?.schemeName || 'Unknown Scheme',
-            totalAmount: weightData?.[0]?.Amount || weightData?.Amount || 0,
-            savedWeight: weightData?.[0]?.Weight || weightData?.Weight || 0,
+            progressPercentage,
+            schemeName: accountData?.schemeSummary?.schemeName || item?.schemeName || 'Unknown Scheme',
+            totalAmount: weightInfo?.Amount || 0,
+            savedWeight: weightInfo?.Weight || 0,
             maturityDate,
           };
         } catch (err) {
-          console.error(`Error processing item ${item.regno}-${item.groupcode}:`, err);
+          console.error(`Error processing account ${item.regno}-${item.groupcode}:`, err);
           return null;
         }
       });
 
       const resolvedData = await Promise.all(productPromises);
-      const validProducts = resolvedData.filter((item) => item !== null && item.amountWeight);
-
-      console.log('Final processed data:', JSON.stringify(validProducts, null, 2));
+      const validProducts = resolvedData.filter(item => item !== null);
 
       if (validProducts.length === 0) {
-        throw new Error('No valid scheme data found');
+        throw new Error('No valid products found after processing');
       }
 
       setProductData(validProducts);
@@ -176,11 +142,11 @@ export const SchemeProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchPhoneSearchData();
-  }, []);
+  }, [fetchPhoneSearchData]);
 
   const value = {
     productData,
@@ -188,7 +154,7 @@ export const SchemeProvider = ({ children }) => {
     error,
     refetch: fetchPhoneSearchData,
     getActiveSchemes: () => productData.filter(item => item.status === 'Active'),
-    getInactiveSchemes: () => productData.filter(item => item.status === 'Deactive'),
+    getInactiveSchemes: () => productData.filter(item => item.status === 'Inactive'),
     getTotalAmount: () => productData.reduce((sum, item) => sum + (item.totalAmount || 0), 0),
   };
 

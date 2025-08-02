@@ -29,6 +29,7 @@ function Drawer() {
       <NavigationStack.Screen name='PaymentHistory' component={Screen.PaymentHistory}/>
       <NavigationStack.Screen name='PaymentDueScreen' component={Screen.PaymentDueScreen}/>
       <NavigationStack.Screen name='PaymentPaidScreen' component={Screen.PaymentPaidScreen}/>
+      <NavigationStack.Screen name='OffersPage' component={Screen.OffersPage}/>
 
     </NavigationStack.Navigator>
   );
