@@ -3,7 +3,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as Screen from '../screens';
-import { SchemeProvider } from '../services/SchemeContext/SchemeContext';
 
 const MainStack = createStackNavigator();
 const NavigationStack = createStackNavigator();
@@ -27,8 +26,9 @@ function Drawer() {
       <NavigationStack.Screen name='Buy' component={Screen.Buy}/>
       <NavigationStack.Screen name='EditingProfile' component={Screen.EditingProfile}/>
       <NavigationStack.Screen name='PaymentHistory' component={Screen.PaymentHistory}/>
-      <NavigationStack.Screen name='PaymentDueScreen' component={Screen.PaymentDueScreen}/>
-      <NavigationStack.Screen name='PaymentPaidScreen' component={Screen.PaymentPaidScreen}/>
+      <NavigationStack.Screen name='MainPageWithYouTube' component={Screen.MainPageWithYouTube}/>
+      <NavigationStack.Screen name='ProfileSidebar' component={Screen.ProfileSidebar}/>
+      <NavigationStack.Screen name='AboutPage' component={Screen.AboutPage}/>
 
     </NavigationStack.Navigator>
   );
@@ -60,7 +60,6 @@ function AppContainer() {
   }
 
   return (
-    <SchemeProvider>
     <NavigationContainer>
       <MainStack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
       <MainStack.Screen name="OTP" component={Screen.OTP} />
@@ -69,7 +68,6 @@ function AppContainer() {
         <MainStack.Screen name="Drawer" component={Drawer} />
       </MainStack.Navigator>
     </NavigationContainer>
-    </SchemeProvider>
   );
 }
 

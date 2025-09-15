@@ -1,16 +1,14 @@
-// ProductCard.js
-import React from 'react';
+import React from 'react'
 import {
   View,
   TouchableOpacity,
   StyleSheet,
-  I18nManager,
-  ActivityIndicator,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import ShimmerPlaceHolder from 'react-native-shimmer-placeholder';
-import { TextDefault } from '../../components';
-import { alignment, colors, scale } from '../../utils';
+  ActivityIndicator
+} from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import { TextDefault } from '../../components'
+import { alignment, colors, scale } from '../../utils'
+import { colors1 } from '../../utils/colors'
 
 function ProductCard({
   productData,
@@ -18,325 +16,351 @@ function ProductCard({
   error,
   navigation,
   status,
-  accountDetails,
+  accountDetails
 }) {
-  const isDreamGoldPlan =
-    accountDetails?.schemeSummary?.schemeName?.trim() === 'DREAM GOLD PLAN';
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
   if (loading) {
     return (
-      <View style={styles.shimmerWrapper}>
-        <ShimmerPlaceHolder
-          style={styles.shimmerBox}
-          autoRun={true}
-          visible={false}
-        />
-      </View>
-    );
+      <ActivityIndicator
+        size='large'
+        color={colors.greenColor}
+        style={{ marginTop: 20 }}
+      />
+    )
   }
 
   if (error) {
     return (
-      <View style={styles.errorWrapper}>
+      <View style={{ alignItems: 'center', marginTop: 20 }}>
         <TextDefault style={{ color: colors.redColor }}>{error}</TextDefault>
       </View>
-    );
+    )
   }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A'
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    })
+  }
+
+  const isDreamGoldPlan =
+    accountDetails?.schemeSummary?.schemeName?.trim() === 'DREAM GOLD PLAN'
 
   return (
     <TouchableOpacity
-      activeOpacity={0.95}
+      activeOpacity={0.9}
       onPress={() =>
         navigation.navigate('ProductDescription', {
           productData,
           status,
-          accountDetails,
+          accountDetails
         })
       }
       style={styles.cardContainer}
     >
-     <LinearGradient
-  colors={['#ffffffff', '#ffffffff']}
-  style={styles.gradientBackground}
->
-
+      {/* 🔥 Gradient Background */}
+      <LinearGradient
+        colors={[colors1.gradientcolor2, colors1.gradientcolor1]}
+        start={{ x: 0, y: 0 }} // Top
+        end={{ x: 0, y: 1 }} // Bottom
+        style={styles.gradientBackground}
+      >
         {/* Top Section */}
-        <View style={styles.topRow}>
-          <View style={styles.planLeft}>
-            <TextDefault style={styles.titleText} numberOfLines={1}>
+        <View style={styles.topSection}>
+          <View>
+            <TextDefault style={styles.text} bold>
               {productData.groupcode} - {productData.regno}
+              {isDreamGoldPlan && (
+                <TextDefault style={[styles.text, { marginLeft: 10 }]}>
+                  / ₹{accountDetails?.amount || 0}
+                </TextDefault>
+              )}
             </TextDefault>
-            <TextDefault style={styles.nameText} numberOfLines={1}>
-              {productData.pname}
+            <TextDefault style={styles.text}>{productData.pname}</TextDefault>
+          </View>
+          <View style={styles.rightTop}>
+            <TextDefault style={styles.text} bold>
+              {accountDetails?.schemeSummary?.schemeName?.trim()}
             </TextDefault>
           </View>
-          <TextDefault style={styles.planName} numberOfLines={1}>
-            {accountDetails?.schemeSummary?.schemeName?.trim()}
-          </TextDefault>
         </View>
 
-        {/* Status */}
+        {/* Status Section */}
         <View style={styles.statusContainer}>
-          <TextDefault style={styles.statusText}>{status}</TextDefault>
+          <TextDefault style={styles.text} bold>
+            {status}
+          </TextDefault>
           <View
             style={[
               styles.statusDot,
-              { backgroundColor: status === 'Active' ? '#4CAF50' : '#F44336' },
+              { backgroundColor: status === 'Active' ? '#4CAF50' : '#F44336' }
             ]}
           />
         </View>
 
-        {/* Info Row */}
-        <View style={styles.infoRow}>
-          <View>
-            <TextDefault style={styles.infoLabel}>
-              {isDreamGoldPlan ? 'Ins Paid' : 'Weight Saved*'}
-            </TextDefault>
-            <TextDefault style={styles.infoValue}>
-              {isDreamGoldPlan
-                ? `${accountDetails?.schemeSummary?.schemaSummaryTransBalance?.insPaid || 0} / ${accountDetails?.schemeSummary?.instalment || 0}`
-                : `${productData.amountWeight?.Weight || 0}g`}
-            </TextDefault>
+        {/* Center Section */}
+        <View style={styles.centerSection}>
+          <View style={styles.headerRow}>
+            <View style={styles.headerTextContainer}>
+              <TextDefault style={[styles.text, styles.headerText]}>
+                {isDreamGoldPlan ? 'Ins Paid' : 'Weight Saved*'}
+              </TextDefault>
+            </View>
+            <View style={styles.headerTextContainer}>
+              <TextDefault style={[styles.text, styles.headerText]}>
+                Total Amount *
+              </TextDefault>
+            </View>
           </View>
-          <View>
-            <TextDefault style={styles.infoLabel}>Total Amount*</TextDefault>
-            <TextDefault style={styles.infoValue}>
-              ₹{productData.amountWeight?.Amount || 0}
-            </TextDefault>
+          <View style={styles.valueRow}>
+            <View style={styles.valueTextContainer}>
+              <TextDefault style={[styles.text, styles.headerText]}>
+                {isDreamGoldPlan
+                  ? `${accountDetails?.schemeSummary?.schemaSummaryTransBalance?.insPaid || 0} / ${accountDetails?.schemeSummary?.instalment || 0}`
+                  : `${productData.amountWeight?.Weight || 0} grams`}
+              </TextDefault>
+            </View>
+            <View style={styles.valueTextContainer}>
+              <TextDefault style={[styles.text, styles.headerText]}>
+                {productData.amountWeight?.Amount || 0} ₹
+              </TextDefault>
+            </View>
           </View>
         </View>
 
+        {/* Yellow Line Below Center Section */}
         <View style={styles.yellowLine} />
 
         {/* Bottom Section */}
-        <View style={styles.bottomRow}>
-          <View style={styles.circle}>
-            <TextDefault style={styles.circleText}>
-              {isDreamGoldPlan ? 'Amount Saved' : 'Weight Saved'}
-            </TextDefault>
-            <TextDefault style={styles.circleValue}>
-              {isDreamGoldPlan
-                ? `₹${accountDetails?.schemeSummary?.schemaSummaryTransBalance?.amtrecd || 0}`
-                : `${productData.amountWeight?.Weight || 0}g`}
-            </TextDefault>
+        <View style={styles.bottomSection}>
+          {/* Circle Section */}
+          <View style={styles.circleContainer}>
+            <View style={styles.weightCircle}>
+              <TextDefault style={styles.weightText}>
+                {isDreamGoldPlan ? 'Amount Saved' : 'Weight Saved'}
+              </TextDefault>
+              <TextDefault style={styles.weightValue}>
+                {isDreamGoldPlan
+                  ? `₹${accountDetails?.schemeSummary?.schemaSummaryTransBalance?.amtrecd || 0}`
+                  : `${productData.amountWeight?.Weight || 0} grams`}
+              </TextDefault>
+            </View>
           </View>
 
+          {/* Maturity Date Section */}
           <View style={styles.dateContainer}>
-            <TextDefault style={styles.dateLabel}>Date of Maturity</TextDefault>
+            <TextDefault style={styles.maturityText}>
+              Date of Maturity
+            </TextDefault>
             <TextDefault style={styles.dateText}>
               {formatDate(productData.maturityDate)}
             </TextDefault>
           </View>
 
-          <View style={styles.buttonGroup}>
+          {/* Pay Button Section */}
+          <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={styles.button}
+              style={styles.payButton}
               onPress={() =>
                 navigation.navigate('ProductDescription', {
                   productData,
                   status,
-                  accountDetails,
+                  accountDetails
                 })
               }
             >
-              <TextDefault style={styles.buttonText}>View</TextDefault>
+              <TextDefault style={styles.payButtonText}>View</TextDefault>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.button}
+              style={styles.payButton}
               onPress={() =>
                 navigation.navigate('Buy', {
                   productData,
                   status,
                   accountDetails,
-                  isDreamGoldPlan,
+                  isDreamGoldPlan
                 })
               }
             >
-              <TextDefault style={styles.buttonText}>Pay</TextDefault>
+              <TextDefault style={styles.payButtonText}>Pay</TextDefault>
             </TouchableOpacity>
           </View>
         </View>
       </LinearGradient>
     </TouchableOpacity>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   cardContainer: {
-    marginHorizontal: scale(10),
-    marginBottom: scale(12),
-    borderRadius: scale(12),
-    backgroundColor: '#ffffffff', // light card color from base
-    padding: scale(12),
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    direction: I18nManager.isRTL ? 'rtl' : 'ltr',
-  },
-  shimmerWrapper: {
-    marginHorizontal: scale(10),
-    marginVertical: scale(20),
-  },
-  shimmerBox: {
-    width: '100%',
-    height: scale(150),
-    borderRadius: scale(12),
-    backgroundColor: '#EAF7FF',
-  },
-  errorWrapper: {
-    alignItems: 'center',
-    marginTop: 20,
+    margin: scale(5),
+    borderRadius: scale(15),
+    overflow: 'hidden',
+    elevation: 6,
+    shadowColor: colors.white,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84
   },
   gradientBackground: {
-    borderRadius: scale(12),
+    borderRadius: scale(15),
+    padding: scale(5)
   },
-  topRow: {
+  topSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: scale(4),
+    marginBottom: scale(20),
+    ...alignment.Psmall
   },
-  planLeft: {
-    flex: 1,
-  },
-  titleText: {
-    fontSize: scale(14),
-    color: '#00334D', // deep navy text
-    fontFamily: 'TrajanPro-Bold',
-  },
-  nameText: {
-    fontSize: scale(13),
-    color: '#33667A', // softer secondary color
-    marginTop: scale(2),
-    marginBottom: scale(4),
-    textAlign: I18nManager.isRTL ? 'right' : 'left',
-    fontFamily: 'TrajanPro-Bold',
-  },
-  planName: {
-    fontSize: scale(14),
-    color: '#00334D',
-    textAlign: 'right',
-    fontFamily: 'TrajanPro-Bold',
+  rightTop: {
+    alignItems: 'flex-end'
   },
   statusContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    alignSelf: 'flex-end',
     alignItems: 'center',
-    marginBottom: scale(6),
-  },
-  statusText: {
-    fontSize: scale(13),
-    color: '#4CAF50', // green success
-    marginRight: scale(4),
-    fontFamily: 'TrajanPro-Normal',
+    marginTop: scale(-30),
+    marginRight: scale(10)
   },
   statusDot: {
-    width: scale(7),
-    height: scale(7),
+    width: scale(8),
+    height: scale(8),
     borderRadius: scale(4),
-    backgroundColor: '#4CAF50',
+    marginLeft: scale(5)
   },
-  infoRow: {
+  centerSection: {
+    paddingVertical: scale(15),
+    borderRadius: scale(5),
+    marginBottom: scale(5),
+    ...alignment.PxSmall
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  valueRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: scale(5),
+    marginTop: scale(5)
   },
-  infoLabel: {
-    fontSize: scale(10),
-    color: '#33667A',
-    marginBottom: scale(2),
-    fontFamily: 'TrajanPro-Bold',
+  headerTextContainer: {
+    flex: 1,
+    alignItems: 'center'
   },
-  infoValue: {
-    fontSize: scale(12),
-    color: '#00334D',
-    fontFamily: 'TrajanPro-Bold',
+  valueTextContainer: {
+    flex: 1,
+    alignItems: 'center'
   },
-  yellowLine: {
-    height: 2,
-    backgroundColor: '#FFC107', // accent yellow
-    borderRadius: 1,
-    marginVertical: scale(8),
-  },
-  bottomRow: {
+  bottomSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: scale(8),
+    ...alignment.PxSmall
   },
-  circle: {
-    backgroundColor: '#FFFFFF',
-    width: scale(70),
-    height: scale(70),
-    borderRadius: scale(35),
+  circleContainer: {
+    alignItems: 'center'
+  },
+  weightCircle: {
+    width: scale(75),
+    height: scale(75),
+    borderRadius: scale(70),
+    backgroundColor: colors.radioColor,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: scale(8),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  circleText: {
-    fontSize: scale(10),
-    color: '#00334D',
-    textAlign: 'center',
-    marginBottom: scale(4),
-    fontFamily: 'TrajanPro-Bold',
-  },
-  circleValue: {
-    fontSize: scale(12),
-    color: '#E63946', // Red for emphasis
-    fontFamily: 'TrajanPro-Bold',
+    padding: scale(10),
+    borderWidth: 5,
+    borderColor: '#eab308'
   },
   dateContainer: {
     flex: 1,
-    marginHorizontal: scale(6),
+    justifyContent: 'center',
+    marginLeft: scale(10),
+    alignItems: 'center'
   },
-  dateLabel: {
-    fontSize: scale(10),
-    color: '#33667A',
-    marginBottom: scale(2),
-    fontFamily: 'TrajanPro-Bold',
+  maturityText: {
+    color: colors.greenColor,
+    fontSize: scale(12),
+    textAlign: 'center',
+    fontWeight: 'bold'
   },
   dateText: {
-    fontSize: scale(12),
-    color: '#00334D',
-    fontFamily: 'TrajanPro-Bold',
+    color: colors.greenColor,
+    fontSize: scale(10),
+    marginTop: scale(2),
+    textAlign: 'center',
+    fontWeight: 'bold'
   },
-  buttonGroup: {
+  buttonContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    marginLeft: scale(10),
     flexDirection: 'row',
-    gap: scale(6),
+    gap: 10
   },
-  button: {
-    borderWidth: 1,
-    borderColor: '#00334D',
-    paddingVertical: scale(4),
+  payButton: {
+    backgroundColor: colors.white,
+    paddingVertical: scale(5),
     paddingHorizontal: scale(10),
-    borderRadius: scale(6),
-    backgroundColor: '#EAF7FF',
+    borderRadius: scale(5),
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginBottom: scale(10)
   },
-  buttonText: {
-    fontSize: scale(11),
-    color: '#00334D',
-    fontFamily: 'TrajanPro-Bold',
+  text: {
+    color: colors.greenColor,
+    fontSize: scale(12),
+    fontWeight: 'bold'
   },
-});
+  bold: {
+    fontWeight: 'bold'
+  },
+  weightText: {
+    color: colors.fontMainColor,
+    fontSize: scale(7),
+    textAlign: 'center',
+    fontWeight: 'bold'
+  },
+  weightValue: {
+    color: colors.fontMainColor,
+    fontSize: scale(8),
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  payButtonText: {
+    color: colors.fontMainColor,
+    fontSize: 12,
+    fontWeight: 'bold'
+  },
+  yellowLine: {
+    height: scale(2),
+    backgroundColor: colors.greenColor,
+    borderRadius: scale(1),
+    marginBottom: scale(10)
+  },
+  accountDetailsSection: {
+    padding: scale(10),
+    backgroundColor: colors.lightGray,
+    borderRadius: scale(5),
+    marginBottom: scale(10)
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: scale(5)
+  },
+  detailLabel: {
+    color: colors.fontMainColor,
+    fontSize: scale(12)
+  },
+  detailValue: {
+    color: colors.fontSecondColor,
+    fontSize: scale(12),
+    fontWeight: '600'
+  }
+})
 
-
-
-
-
-export default ProductCard;
+export default ProductCard

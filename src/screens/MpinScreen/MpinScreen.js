@@ -6,352 +6,288 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
   ToastAndroid,
   Dimensions,
   Animated,
-  Easing,
-  TouchableWithoutFeedback,
-  Keyboard,
-  AppState
+  Easing
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import LottieView from 'lottie-react-native';
-// import { Theme } from '../../utils/GlobalStyles';
-import styles from './MpinStyles';
+import { TextDefault } from '../../components';
+import { alignment, colors } from '../../utils';
+import { colors1 } from '../../utils/colors';
 
 const { width, height } = Dimensions.get('window');
-const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
-// Toast utility
+// Toast function for iOS
 const showToast = (message) => {
-  Platform.OS === 'android'
-    ? ToastAndroid.show(message, ToastAndroid.SHORT)
-    : Alert.alert('', message);
+  if (Platform.OS === 'android') {
+    ToastAndroid.show(message, ToastAndroid.SHORT);
+  } else {
+    Alert.alert('', message);
+  }
 };
 
-// Background image (replace with your actual image path)
-const BACKGROUND_IMAGE = require('../../assets/image/otpbg.jpg');
-
-// ─────────────── Create MPIN Screen ───────────────
-function MpinScreen({ navigation }) {
+function MpinScreen({ route, navigation }) {
   const [mpin, setMpin] = useState(['', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
-  const [showMpin, setShowMpin] = useState(false); // Toggle MPIN visibility
   const inputRefs = useRef([]);
-  const shakeAnimation = useRef(new Animated.Value(0)).current;
-  const fadeAnimation = useRef(new Animated.Value(0)).current;
-  const bgScrollAnimation = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
 
-  // Animation effects
   useEffect(() => {
-    // Fade in animation
-    Animated.timing(fadeAnimation, {
-      toValue: 1,
-      duration: 800,
-      useNativeDriver: true,
-    }).start();
-
-    // Background scroll animation
-    Animated.loop(
-      Animated.timing(bgScrollAnimation, {
-        toValue: 1,
-        duration: 30000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    ).start();
-
     checkIfMpinCreated();
+    animateIn();
   }, []);
 
-  const checkIfMpinCreated = async () => {
-    const isCreated = await AsyncStorage.getItem('isMpinCreated');
-    if (isCreated === 'true') navigation.replace('VerifyMpin');
+  const animateIn = () => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        easing: Easing.out(Easing.poly(4)),
+        useNativeDriver: true,
+      })
+    ]).start();
   };
 
-  const triggerShake = () => {
-    Animated.sequence([
-      Animated.timing(shakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnimation, { toValue: -10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnimation, { toValue: 0, duration: 50, useNativeDriver: true }),
-    ]).start();
+  const checkIfMpinCreated = async () => {
+    try {
+      const isMpinCreated = await AsyncStorage.getItem('isMpinCreated');
+      if (isMpinCreated === 'true') {
+        navigation.replace('VerifyMpin');
+      }
+    } catch (error) {
+      console.error('Error checking MPIN creation:', error);
+    }
   };
 
   const handleMpinChange = (value, index) => {
     if (value && !/^\d$/.test(value)) return;
-    const updated = [...mpin];
-    updated[index] = value;
-    setMpin(updated);
-    value && index < 3 && inputRefs.current[index + 1]?.focus();
-    !value && index > 0 && inputRefs.current[index - 1]?.focus();
+    
+    const newMpin = [...mpin];
+    newMpin[index] = value;
+    setMpin(newMpin);
+
+    if (value && index < 3) {
+      inputRefs.current[index + 1]?.focus();
+    } else if (!value && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
   };
 
-  const handleKeyPress = (e, i) => {
-    if (e.nativeEvent.key === 'Backspace' && !mpin[i] && i > 0) {
-      inputRefs.current[i - 1]?.focus();
+  const handleKeyPress = (event, index) => {
+    if (event.nativeEvent.key === 'Backspace' && !mpin[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
   const handleCreateMpin = async () => {
-    if (mpin.join('').length !== 4) {
-      triggerShake();
+    const enteredMpin = mpin.join('');
+
+    if (enteredMpin.length !== 4) {
       showToast('Please enter a valid 4-digit MPIN.');
-      return;
-    }
-
-    // Simple MPIN validation
-    if (/^(\d)\1{3}$/.test(mpin.join(''))) { // All same digits
-      triggerShake();
-      showToast('Weak MPIN. Avoid using repeating digits.');
-      return;
-    }
-
-    if (mpin.join('') === '1234' || mpin.join('') === '0000') { // Common patterns
-      triggerShake();
-      showToast('Please choose a more secure MPIN.');
       return;
     }
 
     setIsLoading(true);
     try {
-      await AsyncStorage.setItem('mpin', mpin.join(''));
+      await AsyncStorage.setItem('mpin', enteredMpin);
       await AsyncStorage.setItem('isMpinCreated', 'true');
       showToast('MPIN created successfully!');
-      
-      // Success animation
-      Animated.timing(fadeAnimation, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: true,
-      }).start(() => navigation.replace('Drawer'));
+      setTimeout(() => {
+        navigation.replace('Drawer');
+      }, 1000);
     } catch (error) {
       showToast('Failed to save MPIN. Please try again.');
+      console.error(error);
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const toggleMpinVisibility = () => {
-    setShowMpin(!showMpin);
+  const handleForgotMpin = async () => {
+    Alert.alert(
+      'Reset MPIN',
+      'Are you sure you want to reset your MPIN? You will need to verify OTP again.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('mpin');
+              await AsyncStorage.removeItem('isMpinCreated');
+              await AsyncStorage.removeItem('isOtpVerified');
+              navigation.replace('OTP');
+            } catch (error) {
+              showToast('Failed to reset MPIN. Please try again.');
+              console.error(error);
+            }
+          }
+        }
+      ]
+    );
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ImageBackground 
-        source={BACKGROUND_IMAGE} 
-        style={styles.backgroundImage}
-        resizeMode="cover"
+    <ImageBackground
+      source={require('../../assets/bg.jpg')}
+      style={styles.backgroundImage}
+    >
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <Animated.View 
-          style={[
-            styles.backgroundOverlay,
-            {
-              transform: [{
-                translateX: bgScrollAnimation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, -width * 0.3]
-                })
-              }]
-            }
-          ]}
-        />
-
-        <Animated.View style={[styles.container, { opacity: fadeAnimation }]}>
-          <KeyboardAvoidingView
-            style={styles.keyboardContainer}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
-          >
-            <View style={styles.content}>
-              <View style={styles.header}>
-                <LottieView 
-                  source={require('../../assets/animations/lock.json')} 
-                  autoPlay 
-                  loop 
-                  style={styles.lockAnimation} 
+        <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+          {/* Logo Section */}
+          <View style={styles.logoContainer}>
+            <View style={styles.logoCard}>
+              <View style={styles.logoRow}>
+                <Image
+                  source={require('../../assets/logo2.png')}
+                  style={styles.logoImage}
                 />
-                <Text style={styles.title}>Secure Your Account</Text>
-                <Text style={styles.subtitle}>Create a 4-digit MPIN for quick and secure access</Text>
+                <TextDefault style={styles.logoText}>BMG Jewellers Pvt Ltd</TextDefault>
               </View>
+              <TextDefault style={styles.subtitleText}>
+                (GOLD | SILVER | DIAMOND)
+              </TextDefault>
+            </View>
+          </View>
 
-              <Animated.View style={[styles.mpinContainer, { transform: [{ translateX: shakeAnimation }] }]}>
-                <View style={styles.mpinHeader}>
-                  <Text style={styles.mpinLabel}>Enter your MPIN</Text>
-                  <TouchableOpacity onPress={toggleMpinVisibility} style={styles.toggleButton}>
-                    <Text style={styles.toggleButtonText}>
-                      {showMpin ? 'Hide' : 'Show'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                
-                <View style={styles.mpinInputsContainer}>
-                  {mpin.map((digit, i) => (
-                    <AnimatedTextInput
-                      key={i}
-                      ref={(ref) => (inputRefs.current[i] = ref)}
+          {/* Content Section */}
+          <View style={styles.contentContainer}>
+            <View style={styles.headerSection}>
+              <TextDefault style={styles.title}>Create MPIN</TextDefault>
+              <TextDefault style={styles.description}>
+                Set up a secure 4-digit PIN for quick access
+              </TextDefault>
+            </View>
+
+            <View style={styles.mpinSection}>
+              <TextDefault style={styles.mpinLabel}>Enter 4-Digit MPIN</TextDefault>
+              
+              <View style={styles.mpinContainer}>
+                {mpin.map((digit, index) => (
+                  <View key={index} style={styles.mpinInputWrapper}>
+                    <TextInput
+                      ref={(ref) => (inputRefs.current[index] = ref)}
                       style={[
-                        styles.mpinInput, 
+                        styles.mpinInput,
                         digit ? styles.mpinInputFilled : {},
-                        i === 0 && styles.leftRadius, 
-                        i === 3 && styles.rightRadius
                       ]}
                       maxLength={1}
                       keyboardType="numeric"
-                      secureTextEntry={!showMpin}
                       value={digit}
-                      onChangeText={(val) => handleMpinChange(val, i)}
-                      onKeyPress={(e) => handleKeyPress(e, i)}
+                      onChangeText={(value) => handleMpinChange(value, index)}
+                      onKeyPress={(event) => handleKeyPress(event, index)}
+                      secureTextEntry={true}
                       textAlign="center"
-                      autoFocus={i === 0}
+                      selectTextOnFocus={true}
                     />
-                  ))}
-                </View>
-
-                <View style={styles.dotContainer}>
-                  {mpin.map((digit, i) => (
-                    <View 
-                      key={`dot-${i}`} 
-                      style={[
-                        styles.dot, 
-                        digit && styles.dotFilled,
-                        showMpin && digit && styles.dotVisible
-                      ]} 
-                    />
-                  ))}
-                </View>
-              </Animated.View>
-
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  onPress={handleCreateMpin}
-                  disabled={mpin.join('').length !== 4 || isLoading}
-                  style={[
-                    styles.primaryButton, 
-                    mpin.join('').length === 4 && styles.primaryButtonActive, 
-                    isLoading && styles.primaryButtonDisabled
-                  ]}
-                  activeOpacity={0.7}
-                >
-                  {isLoading ? (
-                    <LottieView 
-                      source={require('../../assets/animations/loading.json')} 
-                      autoPlay 
-                      loop 
-                      style={styles.loadingAnimation} 
-                    />
-                  ) : (
-                    <Text style={styles.primaryButtonText}>Create MPIN</Text>
-                  )}
-                </TouchableOpacity>
-
-                <TouchableOpacity 
-                  onPress={() => navigation.goBack()}
-                  style={styles.secondaryButton}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.secondaryButtonText}>Go Back</Text>
-                </TouchableOpacity>
+                    {digit ? <View style={styles.filledIndicator} /> : null}
+                  </View>
+                ))}
               </View>
             </View>
-          </KeyboardAvoidingView>
+
+            <View style={styles.actionSection}>
+              <TouchableOpacity 
+                onPress={handleForgotMpin}
+                style={styles.forgotButton}
+              >
+                <TextDefault style={styles.forgotText}>
+                  Forgot MPIN?
+                </TextDefault>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[
+                  styles.createButton,
+                  mpin.join('').length === 4 ? styles.createButtonActive : {},
+                  isLoading ? styles.createButtonLoading : {}
+                ]} 
+                onPress={handleCreateMpin}
+                disabled={mpin.join('').length !== 4 || isLoading}
+              >
+                <TextDefault style={[
+                  styles.createButtonText,
+                  mpin.join('').length === 4 ? styles.createButtonTextActive : {}
+                ]}>
+                  {isLoading ? 'Creating...' : 'Create MPIN'}
+                </TextDefault>
+              </TouchableOpacity>
+            </View>
+          </View>
         </Animated.View>
-      </ImageBackground>
-    </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 }
 
-// ─────────────── Verify MPIN Screen ───────────────
 function VerifyMpinScreen({ navigation }) {
   const [mpin, setMpin] = useState(['', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
-  const [showMpin, setShowMpin] = useState(false);
   const [attempts, setAttempts] = useState(0);
-  const [lastAttemptTime, setLastAttemptTime] = useState(null);
-  const [cooldown, setCooldown] = useState(0);
   const inputRefs = useRef([]);
-  const shakeAnimation = useRef(new Animated.Value(0)).current;
-  const fadeAnimation = useRef(new Animated.Value(0)).current;
-  const bgScrollAnimation = useRef(new Animated.Value(0)).current;
-  const appState = useRef(AppState.currentState);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
 
-  // Cooldown timer
   useEffect(() => {
-    let timer;
-    if (cooldown > 0) {
-      timer = setInterval(() => {
-        setCooldown(prev => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [cooldown]);
-
-  // Animation effects
-  useEffect(() => {
-    Animated.timing(fadeAnimation, {
-      toValue: 1,
-      duration: 800,
-      useNativeDriver: true,
-    }).start();
-
-    Animated.loop(
-      Animated.timing(bgScrollAnimation, {
-        toValue: 1,
-        duration: 30000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    ).start();
-
-    // App state listener
-    const subscription = AppState.addEventListener('change', nextAppState => {
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        setMpin(['', '', '', '']);
-        inputRefs.current[0]?.focus();
-      }
-      appState.current = nextAppState;
-    });
-
-    return () => subscription.remove();
+    animateIn();
   }, []);
 
-  const triggerShake = () => {
-    Animated.sequence([
-      Animated.timing(shakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnimation, { toValue: -10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
-      Animated.timing(shakeAnimation, { toValue: 0, duration: 50, useNativeDriver: true }),
+  const animateIn = () => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        easing: Easing.out(Easing.poly(4)),
+        useNativeDriver: true,
+      })
     ]).start();
   };
 
   const handleMpinChange = (value, index) => {
-    if (cooldown > 0) return;
     if (value && !/^\d$/.test(value)) return;
-    const updated = [...mpin];
-    updated[index] = value;
-    setMpin(updated);
-    value && index < 3 && inputRefs.current[index + 1]?.focus();
-    !value && index > 0 && inputRefs.current[index - 1]?.focus();
+    
+    const newMpin = [...mpin];
+    newMpin[index] = value;
+    setMpin(newMpin);
+
+    if (value && index < 3) {
+      inputRefs.current[index + 1]?.focus();
+    } else if (!value && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
   };
 
-  const handleKeyPress = (e, i) => {
-    if (e.nativeEvent.key === 'Backspace' && !mpin[i] && i > 0) {
-      inputRefs.current[i - 1]?.focus();
+  const handleKeyPress = (event, index) => {
+    if (event.nativeEvent.key === 'Backspace' && !mpin[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
   const handleVerifyMpin = async () => {
-    if (cooldown > 0) return;
-    if (mpin.join('').length !== 4) {
-      triggerShake();
+    const enteredMpin = mpin.join('');
+
+    if (enteredMpin.length !== 4) {
       showToast('Please enter a valid 4-digit MPIN.');
       return;
     }
@@ -359,170 +295,331 @@ function VerifyMpinScreen({ navigation }) {
     setIsLoading(true);
     try {
       const savedMpin = await AsyncStorage.getItem('mpin');
-      if (mpin.join('') === savedMpin) {
+      if (enteredMpin === savedMpin) {
         showToast('MPIN verified successfully!');
-        Animated.timing(fadeAnimation, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }).start(() => navigation.replace('Drawer'));
+        setTimeout(() => {
+          navigation.replace('Drawer');
+        }, 1000);
       } else {
-        const newAttempts = attempts + 1;
-        setAttempts(newAttempts);
-        setLastAttemptTime(Date.now());
+        setAttempts(prev => prev + 1);
         setMpin(['', '', '', '']);
         inputRefs.current[0]?.focus();
-        triggerShake();
-
-        if (newAttempts >= 3) {
-          // Apply cooldown after 3 attempts
-          const newCooldown = Math.min(30, 5 * Math.pow(2, Math.floor(newAttempts / 3) - 5));
-          setCooldown(newCooldown);
-          
+        
+        if (attempts >= 2) {
           Alert.alert(
             'Too Many Attempts',
-            `Please wait ${newCooldown} seconds before trying again.`,
+            'You have exceeded the maximum number of attempts. Please reset your MPIN.',
             [
               { text: 'Cancel', style: 'cancel' },
-              { 
-                text: 'Reset MPIN', 
-                onPress: () => navigation.replace('OTP') 
-              }
+              { text: 'Reset MPIN', onPress: () => navigation.navigate('OTP') }
             ]
           );
         } else {
-          showToast(`Incorrect MPIN. ${3 - newAttempts} attempts remaining.`);
+          showToast(`Incorrect MPIN. ${2 - attempts} attempts remaining.`);
         }
       }
-    } catch (e) {
-      showToast('Failed to verify MPIN. Try again.');
+    } catch (error) {
+      showToast('Failed to verify MPIN. Please try again.');
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const toggleMpinVisibility = () => {
-    setShowMpin(!showMpin);
-  };
-
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ImageBackground 
-        source={BACKGROUND_IMAGE} 
-        style={styles.backgroundImage}
-        resizeMode="cover"
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <Animated.View 
-          style={[
-            styles.backgroundOverlay,
-            {
-              transform: [{
-                translateX: bgScrollAnimation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, -width * 0.3]
-                })
-              }]
-            }
-          ]}
-        />
-
-        <Animated.View style={[styles.container, { opacity: fadeAnimation }]}>
-          <KeyboardAvoidingView
-            style={styles.keyboardContainer}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
-          >
-            <View style={styles.content}>
-              <View style={styles.header}>
-                <LottieView
-                  source={require('../../assets/animations/lock.json')}
-                  autoPlay
-                  loop
-                  style={styles.lockAnimation}
+        <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+          {/* Logo Section */}
+          <View style={styles.logoContainer}>
+            <View style={styles.logoCard}>
+              <View style={styles.logoRow}>
+                <Image
+                  source={require('../../assets/logo2.png')}
+                  style={styles.logoImage}
                 />
-                <Text style={styles.title}>Welcome Back</Text>
-                <Text style={styles.subtitle}>Enter your MPIN to access your account</Text>
+                <TextDefault style={styles.logoText}>BMG Jewellers Pvt Ltd</TextDefault>
               </View>
+              <TextDefault style={styles.subtitleText}>
+                (GOLD | SILVER | DIAMOND)
+              </TextDefault>
+            </View>
+          </View>
 
-              <Animated.View style={[styles.mpinContainer, { transform: [{ translateX: shakeAnimation }] }]}>
-                <View style={styles.mpinHeader}>
-                  <Text style={styles.mpinLabel}>Enter your MPIN</Text>
-                  <TouchableOpacity onPress={toggleMpinVisibility} style={styles.toggleButton}>
-                    <Text style={styles.toggleButtonText}>
-                      {showMpin ? 'Hide' : 'Show'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                
-                <View style={styles.mpinInputsContainer}>
-                  {mpin.map((digit, i) => (
-                    <AnimatedTextInput
-                      key={i}
-                      ref={(ref) => (inputRefs.current[i] = ref)}
+          {/* Content Section */}
+          <View style={styles.contentContainer}>
+            <View style={styles.headerSection}>
+              <TextDefault style={styles.title}>Enter Your MPIN</TextDefault>
+              <TextDefault style={styles.description}>
+                Enter your 4-digit PIN to continue
+              </TextDefault>
+            </View>
+
+            <View style={styles.mpinSection}>
+              <TextDefault style={styles.mpinLabel}>MPIN</TextDefault>
+              
+              <View style={styles.mpinContainer}>
+                {mpin.map((digit, index) => (
+                  <View key={index} style={styles.mpinInputWrapper}>
+                    <TextInput
+                      ref={(ref) => (inputRefs.current[index] = ref)}
                       style={[
                         styles.mpinInput,
-                        i === 0 && styles.leftRadius,
-                        i === 3 && styles.rightRadius
+                        digit ? styles.mpinInputFilled : {},
                       ]}
                       maxLength={1}
                       keyboardType="numeric"
-                      secureTextEntry={!showMpin}
                       value={digit}
-                      onChangeText={(val) => handleMpinChange(val, i)}
-                      onKeyPress={(e) => handleKeyPress(e, i)}
+                      onChangeText={(value) => handleMpinChange(value, index)}
+                      onKeyPress={(event) => handleKeyPress(event, index)}
+                      secureTextEntry={true}
                       textAlign="center"
-                      editable={cooldown === 0}
-                      autoFocus={i === 0}
+                      selectTextOnFocus={true}
                     />
-                  ))}
-                </View>
-
-                {cooldown > 0 && (
-                  <Text style={styles.cooldownText}>
-                    Try again in {cooldown} seconds
-                  </Text>
-                )}
-              </Animated.View>
-
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  onPress={handleVerifyMpin}
-                  disabled={mpin.join('').length !== 4 || isLoading || cooldown > 0}
-                  style={[
-                    styles.primaryButton,
-                    mpin.join('').length === 4 && cooldown === 0 && styles.primaryButtonActive,
-                    (isLoading || cooldown > 0) && styles.primaryButtonDisabled
-                  ]}
-                  activeOpacity={0.7}
-                >
-                  {isLoading ? (
-                    <LottieView
-                      source={require('../../assets/animations/loading.json')}
-                      autoPlay
-                      loop
-                      style={styles.loadingAnimation}
-                    />
-                  ) : (
-                    <Text style={styles.primaryButtonText}>
-                      {cooldown > 0 ? `Wait ${cooldown}s` : 'Verify MPIN'}
-                    </Text>
-                  )}
-                </TouchableOpacity>
-
-                <TouchableOpacity 
-                  onPress={() => navigation.replace('OTP')} 
-                  style={styles.secondaryButton}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.secondaryButtonText}>Forgot MPIN?</Text>
-                </TouchableOpacity>
+                    {digit ? <View style={styles.filledIndicator} /> : null}
+                  </View>
+                ))}
               </View>
+
+              {attempts > 0 && (
+                <TextDefault style={styles.attemptsText}>
+                  Attempts remaining: {3 - attempts}
+                </TextDefault>
+              )}
             </View>
-          </KeyboardAvoidingView>
+
+            <View style={styles.actionSection}>
+              <TouchableOpacity 
+                onPress={() => navigation.navigate('OTP')}
+                style={styles.forgotButton}
+              >
+                <TextDefault style={styles.forgotText}>
+                  Forgot MPIN?
+                </TextDefault>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[
+                  styles.createButton,
+                  mpin.join('').length === 4 ? styles.createButtonActive : {},
+                  isLoading ? styles.createButtonLoading : {}
+                ]} 
+                onPress={handleVerifyMpin}
+                disabled={mpin.join('').length !== 4 || isLoading}
+              >
+                <TextDefault style={[
+                  styles.createButtonText,
+                  mpin.join('').length === 4 ? styles.createButtonTextActive : {}
+                ]}>
+                  {isLoading ? 'Verifying...' : 'Verify MPIN'}
+                </TextDefault>
+              </TouchableOpacity>
+            </View>
+          </View>
         </Animated.View>
-      </ImageBackground>
-    </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+   
   );
 }
+
+const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+  },
+  keyboardContainer: {
+    flex: 1,
+     backgroundColor: colors1.background,
+  },
+  container: {
+    flex: 1,
+   
+    alignItems: 'center',
+    marginTop: 60,
+  },
+  
+  // Logo Section
+  logoContainer: {
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    paddingBottom: 20,
+  },
+  logoCard: {
+    backgroundColor: colors1.cardBackground,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: colors1.borderLight,
+  },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  logoImage: {
+    width: 40,
+    height: 30,
+    marginRight: 10,
+    borderRadius: 6,
+  },
+  logoText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors1.primaryText,
+    letterSpacing: 0.8,
+  },
+  subtitleText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: colors1.textSecondary,
+    letterSpacing: 1.5,
+    opacity: 0.8,
+  },
+
+  // Content Section
+  contentContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    alignItems: 'center',
+  },
+  headerSection: {
+    alignItems: 'center',
+    marginBottom: 30,
+    marginTop: 30,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: colors1.textPrimary,
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  description: {
+    fontSize: 14,
+    color: colors1.textSecondary,
+    textAlign: 'center',
+    opacity: 0.8,
+  },
+
+  // MPIN Section
+  mpinSection: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  mpinLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors1.textPrimary,
+    marginBottom: 16,
+    alignSelf: 'flex-start',
+    marginLeft: 6,
+  },
+  mpinContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  mpinInputWrapper: {
+    marginHorizontal: 6,
+    position: 'relative',
+  },
+  mpinInput: {
+    width: 55,
+    height: 65,
+    borderWidth: 2,
+    borderColor: colors1.borderLight,
+    borderRadius: 14,
+    fontSize: 22,
+    fontWeight: 'bold',
+    backgroundColor: colors1.cardBackground,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+    textAlign: 'center',
+    color: colors1.textPrimary,
+  },
+  mpinInputFilled: {
+    borderColor: colors1.primary,
+    backgroundColor: colors1.cardBackground,
+    shadowColor: colors1.primary,
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  filledIndicator: {
+    position: 'absolute',
+    bottom: -6,
+    left: '50%',
+    marginLeft: -3,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors1.primary,
+  },
+  attemptsText: {
+    fontSize: 13,
+    color: colors1.error,
+    fontWeight: '500',
+    marginTop: 6,
+  },
+
+  // Action Section
+  actionSection: {
+    paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+    alignItems: 'center',
+  },
+  forgotButton: {
+    paddingVertical: 10,
+    marginBottom: 10,
+  },
+  forgotText: {
+    color: colors1.primary,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  createButton: {
+    backgroundColor: colors1.borderLight,
+    paddingVertical: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+    width: 300,
+  },
+  createButtonActive: {
+    backgroundColor: colors1.primary,
+    shadowColor: colors1.primaryDark,
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  createButtonLoading: {
+    opacity: 0.7,
+  },
+  createButtonText: {
+    color: colors1.textSecondary,
+    fontSize: 17,
+    fontWeight: 'bold',
+  },
+  createButtonTextActive: {
+    color: colors1.textLight,
+  },
+});
 
 export { MpinScreen, VerifyMpinScreen };

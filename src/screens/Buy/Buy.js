@@ -11,8 +11,8 @@ import {
   BackHandler,
   SafeAreaView,
   Dimensions,
-  Animated,
-  Easing
+  Platform,
+  ScrollView
 } from 'react-native';
 import { useRoute, useNavigation, useFocusEffect } from '@react-navigation/native';
 import { alignment, colors } from '../../utils';
@@ -20,13 +20,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { WebView } from 'react-native-webview';
 import { showToast } from '../../utils/toast';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { colors1 } from '../../utils/colors';
 
 const { width } = Dimensions.get('window');
 
 // Constants
 const API_BASE_URL = 'https://akj.brightechsoftware.com';
-const POLLING_INTERVAL = 5000;
-const POLLING_TIMEOUT = 300000;
+const POLLING_INTERVAL = 5000; // 5 seconds
+const POLLING_TIMEOUT = 300000; // 5 minutes
 
 function Buy() {
   // State variables
@@ -42,11 +43,6 @@ function Buy() {
   const [orderId, setOrderId] = useState('');
   const [goldRateError, setGoldRateError] = useState(false);
 
-  // Animation refs
-  const cardAnim = useRef(new Animated.Value(0)).current;
-  const buttonAnim = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
   // Refs for cleanup
   const verifyIntervalRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -60,31 +56,6 @@ function Buy() {
   const isDreamGoldPlan = route.params?.isDreamGoldPlan;
   const accountDetails = route.params?.accountDetails;
   const productData = route.params?.productData;
-
-  // Animations
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-      Animated.spring(cardAnim, {
-        toValue: 1,
-        friction: 5,
-        tension: 30,
-        delay: 100,
-        useNativeDriver: true,
-      }),
-      Animated.spring(buttonAnim, {
-        toValue: 1,
-        friction: 7,
-        tension: 40,
-        delay: 300,
-        useNativeDriver: true,
-      })
-    ]).start();
-  }, []);
 
   // Handle back button when WebView is open
   useFocusEffect(
@@ -160,7 +131,7 @@ function Buy() {
     try {
       setGoldRateError(false);
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
       const response = await fetch(`${API_BASE_URL}/v1/api/account/todayrate`, {
         signal: controller.signal,
@@ -230,10 +201,19 @@ function Buy() {
 
   // Handle amount input change
   const handleAmountChange = (text) => {
+    // Only allow numbers and decimal point
     const sanitizedText = text.replace(/[^0-9.]/g, '');
+    
+    // Prevent multiple decimal points
     const parts = sanitizedText.split('.');
-    if (parts.length > 2) return;
-    if (parts[1] && parts[1].length > 2) return;
+    if (parts.length > 2) {
+      return;
+    }
+    
+    // Limit decimal places to 2
+    if (parts[1] && parts[1].length > 2) {
+      return;
+    }
 
     setAmount(sanitizedText);
     convertAmountToWeight(sanitizedText);
@@ -289,7 +269,7 @@ function Buy() {
   // Create payment link
   const createPaymentLink = async () => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/payment/create-payment-link`, {
@@ -344,7 +324,7 @@ function Buy() {
 
   // Start payment verification polling
   const startPaymentVerification = (orderId) => {
-    clearPaymentPolling();
+    clearPaymentPolling(); // Clear any existing intervals
 
     verifyIntervalRef.current = setInterval(async () => {
       try {
@@ -402,9 +382,11 @@ function Buy() {
         }
       } catch (error) {
         console.error('Verification error:', error);
+        // Continue polling on error, don't stop
       }
     }, POLLING_INTERVAL);
 
+    // Set timeout to stop polling after 5 minutes
     timeoutRef.current = setTimeout(() => {
       clearPaymentPolling();
       if (isMountedRef.current && showWebView) {
@@ -424,32 +406,21 @@ function Buy() {
 
   // Handle payment process
   const handlePay = async () => {
-    if (!validatePaymentInputs()) return;
+    if (!validatePaymentInputs()) {
+      return;
+    }
 
     try {
       setPaymentLoading(true);
       
-      // Button press animation
-      Animated.sequence([
-        Animated.timing(buttonAnim, {
-          toValue: 0.95,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        Animated.spring(buttonAnim, {
-          toValue: 1,
-          friction: 3,
-          tension: 40,
-          useNativeDriver: true,
-        })
-      ]).start();
-
       const paymentData = await createPaymentLink();
       
       if (isMountedRef.current) {
         setOrderId(paymentData.order_id);
         setPaymentUrl(paymentData.payment_link);
         setShowWebView(true);
+        
+        // Start payment verification
         startPaymentVerification(paymentData.order_id);
       }
 
@@ -473,6 +444,8 @@ function Buy() {
 
   // Handle WebView navigation changes
   const handleWebViewNavigationStateChange = (navState) => {
+    console.log('WebView navigation:', navState.url);
+    
     const url = navState.url.toLowerCase();
     if (url.includes('success') || url.includes('payment-success') || url.includes('completed')) {
       console.log('Success URL detected, waiting for verification...');
@@ -487,13 +460,14 @@ function Buy() {
   const handleWebViewError = (syntheticEvent) => {
     const { nativeEvent } = syntheticEvent;
     console.error('WebView error:', nativeEvent);
+    
     showToast('Failed to load payment page. Please check your internet connection and try again.');
   };
 
   // WebView component
   if (showWebView) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors1.background }}>
         <View style={styles.webViewHeader}>
           <TouchableOpacity
             style={styles.closeButton}
@@ -514,10 +488,10 @@ function Buy() {
               );
             }}
           >
-            <Icon name="close" size={24} color="#666" />
+            <Icon name="close" size={24} color={colors1.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.webViewTitle}>Complete Payment</Text>
-          <View style={{ width: 40 }} />
+          <View style={styles.closeButton} />
         </View>
         <WebView
           source={{ uri: paymentUrl }}
@@ -526,7 +500,7 @@ function Buy() {
           startInLoadingState={true}
           renderLoading={() => (
             <View style={styles.webViewLoading}>
-              <ActivityIndicator size="large" color={colors.primary} />
+              <ActivityIndicator size="large" color={colors1.primary} />
               <Text style={styles.loadingText}>Loading payment page...</Text>
             </View>
           )}
@@ -540,163 +514,199 @@ function Buy() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Animated.View style={{ opacity: fadeAnim }}>
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* Gold Rate Card */}
         {!isDreamGoldPlan && (
-          <Animated.View style={[
-            styles.card,
-            {
-              transform: [{
-                scale: cardAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.9, 1]
-                })
-              }],
-              opacity: cardAnim
-            }
-          ]}>
+          <View style={styles.rateCard}>
             <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Current Buying Rate</Text>
-              <Text style={styles.cardSubtitle}>Value added and GST will be applicable</Text>
+              <Icon name="trending-up" size={20} color={colors1.primary} />
+              <Text style={styles.cardHeaderText}>Current Gold Rate</Text>
             </View>
-            <View style={styles.rateCard}>
-              <Image 
-                source={require('../../assets/gold.png')} 
-                style={styles.goldImage} 
-              />
-              <View style={styles.rateTextContainer}>
-                <Text style={styles.goldText}>Gold 22K (916)</Text>
-                {loading ? (
-                  <ActivityIndicator size="small" color={colors.primary} />
-                ) : goldRateError ? (
-                  <TouchableOpacity 
-                    style={styles.retryButton}
-                    onPress={fetchGoldRate}
-                  >
-                    <Icon name="refresh" size={16} color={colors.danger} />
-                    <Text style={styles.retryText}>Tap to retry</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <Text style={styles.rateText}>₹{goldRate} / gm</Text>
-                )}
+            <Text style={styles.cardSubtitle}>Value added and GST will be applicable</Text>
+            <View style={styles.rateContent}>
+              <View style={styles.rateSection}>
+                <Image 
+                  source={require('../../assets/gold.png')} 
+                  style={styles.goldImage} 
+                  resizeMode="contain"
+                />
+                <View style={styles.rateTextContainer}>
+                  <Text style={styles.goldText}>Gold 22K (916)</Text>
+                  {loading ? (
+                    <ActivityIndicator size="small" color={colors1.primary} />
+                  ) : goldRateError ? (
+                    <TouchableOpacity 
+                      style={styles.retryButton}
+                      onPress={fetchGoldRate}
+                    >
+                      <Text style={styles.retryText}>Tap to retry</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <Text style={styles.rateText}>{`₹${goldRate} / gm`}</Text>
+                  )}
+                </View>
               </View>
             </View>
-          </Animated.View>
+          </View>
         )}
 
-        {/* Main Payment Card */}
-        <Animated.View style={[
-          styles.card,
-          styles.mainCard,
-          {
-            transform: [{
-              translateY: cardAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 0]
-              })
-            }],
-            opacity: cardAnim
-          }
-        ]}>
-          {isDreamGoldPlan ? (
-            <>
-              <Text style={styles.cardTitle}>DREAM GOLD PLAN</Text>
-              <View style={styles.detailsContainer}>
-                <View style={styles.detailRow}>
+        {/* DREAM GOLD PLAN UI */}
+        {isDreamGoldPlan ? (
+          <View style={styles.dreamGoldCard}>
+            <View style={styles.cardHeader}>
+              <Icon name="card-giftcard" size={20} color={colors1.primary} />
+              <Text style={styles.cardHeaderText}>DREAM GOLD PLAN</Text>
+            </View>
+            
+            <View style={styles.detailsContainer}>
+              <View style={styles.detailRow}>
+                <View style={styles.detailLabelContainer}>
+                  <Icon name="code" size={16} color={colors1.textSecondary} />
                   <Text style={styles.detailLabel}>Group Code</Text>
-                  <Text style={styles.detailValue}>{productData?.groupcode || '-'}</Text>
                 </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Membership No</Text>
-                  <Text style={styles.detailValue}>{productData?.regno || '-'}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Scheme Amount</Text>
-                  <Text style={styles.detailValue}>{productData?.amountWeight?.Amount || '-'}</Text>
-                </View>
-              </View>
-              <Text style={styles.paymentOptionsLabel}>Payment Options</Text>
-              <View style={styles.paymentMethods}>
-                <Image 
-                  source={require('../../assets/images/gpay.jpeg')} 
-                  style={styles.paymentMethodIcon} 
-                />
-                {/* <Image 
-                  source={require('../../assets/images/gpay.jpeg')} 
-                  style={styles.paymentMethodIcon} 
-                />
-                <Image 
-                  source={require('../../assets/images/gpay.jpeg')} 
-                  style={styles.paymentMethodIcon} 
-                /> */}
-              </View>
-            </>
-          ) : (
-            <>
-              <Text style={styles.cardTitle}>Quick Pay</Text>
-              <View style={styles.inputRow}>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Amount (₹)</Text>
-                  <TextInput
-                    style={styles.input}
-                    keyboardType="decimal-pad"
-                    value={amount}           
-                    onChangeText={handleAmountChange}
-                    placeholder="Enter amount"
-                    placeholderTextColor={colors.gray}
-                  />
-                </View>
-                
-                <View style={styles.swapIconContainer}>
-                  <Icon name="swap-horiz" size={28} color={colors.primary} />
-                </View>
-                
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Weight (grams)</Text>
-                  <TextInput
-                    style={[styles.input, styles.disabledInput]}
-                    value={weight}
-                    editable={false}
-                    placeholder="Auto calculated"
-                    placeholderTextColor={colors.gray}
-                  />
-                </View>
+                <Text style={styles.detailValue}>{productData?.groupcode || '-'}</Text>
               </View>
               
-              {amount && goldRate && (
-                <Text style={styles.infoText}>
-                  You will purchase {weight}g of 22K gold
-                </Text>
-              )}
-            </>
-          )}
+              <View style={styles.separator} />
+              
+              <View style={styles.detailRow}>
+                <View style={styles.detailLabelContainer}>
+                  <Icon name="badge" size={16} color={colors1.textSecondary} />
+                  <Text style={styles.detailLabel}>Membership No</Text>
+                </View>
+                <Text style={styles.detailValue}>{productData?.regno || '-'}</Text>
+              </View>
+              
+              <View style={styles.separator} />
+              
+              <View style={styles.detailRow}>
+                <View style={styles.detailLabelContainer}>
+                  <Icon name="account-balance-wallet" size={16} color={colors1.textSecondary} />
+                  <Text style={styles.detailLabel}>Scheme Amount</Text>
+                </View>
+                <Text style={styles.detailValue}>{productData?.amountWeight?.Amount || '-'}</Text>
+              </View>
+            </View>
 
-          <Animated.View style={{
-            transform: [{ scale: buttonAnim }]
-          }}>
+            <View style={styles.paymentOptions}>
+              <Text style={styles.paymentOptionsTitle}>Payment Options</Text>
+              <View style={styles.paymentIcons}>
+                <Image 
+                  source={require('../../assets/images/gpay.jpeg')} 
+                  style={styles.paymentIcon} 
+                />
+                <Image 
+                  source={require('../../assets/images/gpay.jpeg')} 
+                  style={styles.paymentIcon} 
+                />
+                <Image 
+                  source={require('../../assets/images/gpay.jpeg')} 
+                  style={styles.paymentIcon} 
+                />
+              </View>
+            </View>
+
+            <TouchableOpacity 
+              style={[styles.payButton, paymentLoading && styles.disabledButton]}
+              onPress={handlePay}
+              disabled={paymentLoading}
+            >
+              {paymentLoading ? (
+                <ActivityIndicator color={colors1.buttonText} />
+              ) : (
+                <>
+                  <Icon name="payment" size={20} color={colors1.buttonText} />
+                  <Text style={styles.payButtonText}>PROCEED TO PAY</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        ) : (
+          // Quick Pay Card (current buying container) only for DigiGold
+          <View style={styles.quickPayCard}>
+            <View style={styles.cardHeader}>
+              <Icon name="flash-on" size={20} color={colors1.primary} />
+              <Text style={styles.cardHeaderText}>Quick Pay</Text>
+            </View>
+            
+            <View style={styles.quickPaySection}>
+              <View style={styles.inputContainer}>
+                <View style={styles.inputLabelContainer}>
+                  <Icon name="currency-rupee" size={16} color={colors1.textSecondary} />
+                  <Text style={styles.label}>Amount (₹)</Text>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="decimal-pad"
+                  value={amount}           
+                  editable={!isDreamGoldPlan && !paymentLoading}
+                  onChangeText={handleAmountChange}
+                  placeholder="Enter amount"
+                  placeholderTextColor={colors1.textSecondary}
+                  maxLength={10}
+                />
+              </View>
+              
+              {/* Only show weight conversion for DigiGold plans */}
+              {!isDreamGoldPlan && (
+                <>
+                  <View style={styles.conversionArrow}>
+                    <Icon name="swap-vert" size={24} color={colors1.primary} />
+                  </View>
+                  
+                  <View style={styles.inputContainer}>
+                    <View style={styles.inputLabelContainer}>
+                      <Icon name="scale" size={16} color={colors1.textSecondary} />
+                      <Text style={styles.label}>Weight (grams)</Text>
+                    </View>
+                    <TextInput
+                      style={[styles.input, styles.disabledInput]}
+                      value={weight}
+                      editable={false}
+                      placeholder="Auto calculated"
+                      placeholderTextColor={colors1.textSecondary}
+                    />
+                  </View>
+                </>
+              )}
+            </View>
+            
+            {/* Payment Button */}
             <TouchableOpacity 
               style={[
-                styles.payButton,
+                styles.payButton, 
                 (paymentLoading || loading || !goldRate || !amount || parseFloat(amount) <= 0) && styles.disabledButton
               ]} 
               onPress={handlePay}
               disabled={paymentLoading || loading || !goldRate || !amount || parseFloat(amount) <= 0}
-              activeOpacity={0.8}
             >
               {paymentLoading ? (
-                <ActivityIndicator color={colors.white} />
+                <ActivityIndicator color={colors1.buttonText} />
               ) : (
-                <View style={styles.buttonContent}>
+                <>
+                  <Icon name="payment" size={20} color={colors1.buttonText} />
                   <Text style={styles.payButtonText}>
                     {amount && goldRate ? `Pay ₹${amount}` : 'Proceed to pay'}
                   </Text>
-                  <Icon name="arrow-forward" size={20} color={colors.white} />
-                </View>
+                </>
               )}
             </TouchableOpacity>
-          </Animated.View>
-        </Animated.View>
-      </Animated.View>
+            
+            {/* Info Text */}
+            {amount && goldRate && (
+              <View style={styles.infoContainer}>
+                <Icon name="info-outline" size={16} color={colors1.textSecondary} />
+                <Text style={styles.infoText}>
+                  {isDreamGoldPlan 
+                    ? `You will pay ₹${amount} for your Dream Gold plan`
+                    : `You will purchase ${weight}g of 22K gold`
+                  }
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -704,45 +714,66 @@ function Buy() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDF9F3',
-    padding: 20,
+    backgroundColor: colors1.background,
+    padding: 16,
   },
-  card: {
-    backgroundColor: colors.white,
+  rateCard: {
+    backgroundColor: colors1.cardBackground,
     borderRadius: 16,
-    padding: 24,
+    padding: 20,
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 6,
-  },
-  mainCard: {
-    shadowColor: colors.primary,
     shadowOpacity: 0.1,
-    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  dreamGoldCard: {
+    backgroundColor: colors1.cardBackground,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  quickPayCard: {
+    backgroundColor: colors1.cardBackground,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    elevation: 5,
   },
   cardHeader: {
-    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#2c3e50',
-    marginBottom: 4,
+  cardHeaderText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors1.textPrimary,
+    marginLeft: 8,
   },
   cardSubtitle: {
     fontSize: 14,
-    color: '#7f8c8d',
+    color: colors1.textSecondary,
+    marginBottom: 16,
   },
-  rateCard: {
+  rateContent: {
+    backgroundColor: colors1.sectionBackground,
+    borderRadius: 12,
+    padding: 16,
+  },
+  rateSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    marginTop: 12,
   },
   goldImage: {
     width: 48,
@@ -755,154 +786,183 @@ const styles = StyleSheet.create({
   goldText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2c3e50',
+    color: colors1.textPrimary,
     marginBottom: 4,
   },
   rateText: {
     fontSize: 18,
-    fontWeight: '700',
-    color: colors.primary,
+    color: colors1.primary,
+    fontWeight: 'bold',
   },
   retryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    padding: 4,
   },
   retryText: {
     fontSize: 14,
-    color: colors.danger,
-    marginLeft: 6,
+    color: colors1.error,
     textDecorationLine: 'underline',
   },
   detailsContainer: {
-    marginVertical: 16,
+    backgroundColor: colors1.sectionBackground,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ecf0f1',
+  },
+  detailLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   detailLabel: {
     fontSize: 16,
-    color: '#7f8c8d',
-    fontWeight: '500',
+    color: colors1.textSecondary,
+    marginLeft: 8,
   },
   detailValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2c3e50',
+    color: colors1.textPrimary,
   },
-  paymentOptionsLabel: {
+  separator: {
+    height: 1,
+    backgroundColor: colors1.borderLight,
+    marginVertical: 4,
+  },
+  paymentOptions: {
+    marginBottom: 20,
+  },
+  paymentOptionsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#2c3e50',
-    marginTop: 16,
+    color: colors1.textPrimary,
     marginBottom: 12,
   },
-  paymentMethods: {
+  paymentIcons: {
     flexDirection: 'row',
-    marginBottom: 24,
+    justifyContent: 'flex-start',
   },
-  paymentMethodIcon: {
+  paymentIcon: {
     width: 48,
     height: 48,
-    borderRadius: 8,
     marginRight: 12,
+    borderRadius: 8,
   },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+  quickPaySection: {
     marginBottom: 24,
   },
   inputContainer: {
-    flex: 1,
+    marginBottom: 16,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#7f8c8d',
+  inputLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
   },
+  label: {
+    fontSize: 16,
+    color: colors1.textPrimary,
+    marginLeft: 8,
+    fontWeight: '500',
+  },
   input: {
-    height: 52,
+    height: 56,
     borderWidth: 1.5,
-    borderColor: '#dfe6e9',
+    borderColor: colors1.borderLight,
     borderRadius: 12,
     paddingHorizontal: 16,
+    color: colors1.textPrimary,
     fontSize: 16,
-    color: '#2c3e50',
-    backgroundColor: colors.white,
+    backgroundColor: colors1.cardBackground,
   },
   disabledInput: {
-    backgroundColor: '#f8f9fa',
-    color: '#7f8c8d',
+    backgroundColor: colors1.sectionBackground,
+    color: colors1.textSecondary,
   },
-  swapIconContainer: {
-    paddingHorizontal: 8,
-    paddingBottom: 12,
+  conversionArrow: {
+    alignItems: 'center',
+    marginVertical: 8,
   },
   payButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors1.primary,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor:"#FDF9F3",
-    borderWidth:1
+    flexDirection: 'row',
+    minHeight: 56,
+    shadowColor: colors1.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   disabledButton: {
-    backgroundColor: '#bdc3c7',
-    shadowColor: '#7f8c8d',
-  },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: colors1.textSecondary,
+    opacity: 0.7,
   },
   payButtonText: {
-    color: colors.black,
+    color: colors1.buttonText,
     fontSize: 16,
-    fontWeight: '700',
-    marginRight: 8,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: colors1.sectionBackground,
+    borderRadius: 8,
   },
   infoText: {
+    marginLeft: 8,
+    color: colors1.textSecondary,
     fontSize: 14,
-    color: '#7f8c8d',
-    textAlign: 'center',
-    marginBottom: 16,
     fontStyle: 'italic',
   },
   webViewHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: colors.white,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: colors1.headerBackground,
     borderBottomWidth: 1,
-    borderBottomColor: '#ecf0f1',
+    borderBottomColor: colors1.borderLight,
   },
   closeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    backgroundColor: colors1.sectionBackground,
     alignItems: 'center',
     justifyContent: 'center',
   },
   webViewTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#2c3e50',
+    fontWeight: 'bold',
+    color: colors1.textPrimary,
   },
   webViewLoading: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.white,
+    backgroundColor: colors1.background,
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#7f8c8d',
+    color: colors1.textSecondary,
   },
 });
 

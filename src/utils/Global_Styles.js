@@ -28,7 +28,6 @@ export const FontFamily = {
     gilroyMedium: "Gilroy-Medium",
     soraRegular: "Sora-Regular",
     soraSemiBold: "Sora-SemiBold",
-    
   };
 
   

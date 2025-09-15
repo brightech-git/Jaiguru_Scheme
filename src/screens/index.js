@@ -17,8 +17,9 @@ import KnowMore from './KnowMore/KnowMore'
 import Buy from './Buy/Buy'
 import EditingProfile from './EditingProfile/EditingProfile'
 import PaymentHistory from './PaymentHistory/PaymentHistory'
-import PaymentDueScreen from './PaymentDue/PaymentDue'
-import PaymentPaidScreen from './PaymentPaidScreen/PaymentPaidScreen'
+import MainPageWithYouTube from './Youtube/Youtube'
+import ProfileSidebar from './ProfileDashboard/ProfileContainer/ProfileSidebar'
+import AboutPage from './About/About'
 
 export {
   MainLanding,
@@ -39,6 +40,7 @@ export {
   Buy,
   EditingProfile,
   PaymentHistory,
-  PaymentDueScreen,
-  PaymentPaidScreen
+  MainPageWithYouTube,
+  ProfileSidebar,
+  AboutPage
 }

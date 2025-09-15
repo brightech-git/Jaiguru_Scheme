@@ -5,12 +5,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'; // Remove SimpleLin
 import styles from './styles';
 
 import { scale, colors } from '../../utils';
+import { colors1 } from '../../utils/colors';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 function BottomTab({ screen }) {
   const navigation = useNavigation();
  
   const getIconColor = (currentScreen) => {
-    return screen === currentScreen ? colors.bottomColor : colors.darkGrayText;
+    return screen === currentScreen ? colors1.primaryText : colors.darkGrayText;
   };
 
   const getTextStyle = (currentScreen) => {
@@ -64,7 +65,7 @@ function BottomTab({ screen }) {
      
 
       {/* Profile Icon */}
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={() => {
          
             navigation.navigate('ProfileDashboard');
@@ -81,7 +82,7 @@ function BottomTab({ screen }) {
           
         </View>
         <Text style={getTextStyle('PROFILE')}>Menu</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 }

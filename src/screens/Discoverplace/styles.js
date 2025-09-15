@@ -1,6 +1,8 @@
+// Updated styles.js
 import { StyleSheet } from 'react-native';
 import { colors } from '../../utils/colors';
 import { alignment } from '../../utils';
+
 
 const styles = StyleSheet.create({
   mainBackground: {
@@ -9,7 +11,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   backgroundImageStyle: {
-    opacity: 0.9,
+    opacity: 0.9, // Adjust opacity as needed
   },
   container: {
     flex: 1,
@@ -32,9 +34,8 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 20,
-    // fontWeight: 'bold',
-    color: colors.black,
-    fontFamily: 'TrajanPro-Bold',
+    fontWeight: 'bold',
+    color: colors.textColor,
   },
   scrollViewContentContainer: {
     flexGrow: 1,
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingVertical: 20,
-    padding: 20,
+    padding:20
   },
   grayContainer: {
     flexDirection: 'row',
@@ -78,22 +79,20 @@ const styles = StyleSheet.create({
   cardTitle: {
     marginTop: 10,
     fontSize: 16,
-    // fontWeight: 'bold',
+    fontWeight: 'bold',
     color: colors.black,
-    alignSelf: 'flex-start',
-    fontFamily: 'TrajanPro-Bold',
+    alignSelf: 'flex-start', // Aligns the title to the left
   },
   subtitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 5,
-    alignSelf: 'flex-start',
+    alignSelf: 'flex-start', // Aligns the subtitle container to the left
   },
   cardSubtitle: {
     fontSize: 14,
     color: colors.fontThirdColor,
-    marginLeft: 5,
-    fontFamily: 'TrajanPro-Normal',
+    marginLeft: 5, // Adds space between icon and text
   },
   bottomTab: {
     position: 'absolute',
@@ -118,37 +117,30 @@ const styles = StyleSheet.create({
   tripButtonText: {
     fontSize: 13,
     color: colors.fontMainColor,
-    marginRight: 5,
-    // fontWeight: 'bold',
-    fontFamily: 'TrajanPro-Bold',
+    marginRight: 5, // Adds space between text and icon
+    fontWeight: 'bold'
   },
   title: {
     ...alignment.PxSmall,
     ...alignment.PLxSmall,
-    // fontWeight: 'bold',
-    fontSize: 18,
-    color: colors.greenColor,
-    fontFamily: 'TrajanPro-Bold',
-  },
-  likeIconContainer: {
-    position: 'absolute',
-    top: 15,
-    right: 15,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
-  titleSpacer1:{
-    // alignItems:"center",
-    textAlign:"center",
-    justifyContent:"center",
-    paddingTop:300,
-     fontFamily: 'TrajanPro-Bold',
-  }
+    fontWeight: 'bold',
+    fontSize: 17, // Ensure the font size is visible enough
+    color: colors.greenColor, // Add color for better visibility if needed
+},
+likeIconContainer: {
+  position: 'absolute',
+  top: 15, // Adjust to position inside the card
+  right: 15, // Adjust to position inside the card
+  width: 30,
+  height: 30,
+  borderRadius: 15,
+  backgroundColor: 'rgba(255, 255, 255, 0.5)',// Transparent black (50% opacity)
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 1, // Ensures it stays above other elements
+},
+
+
 });
 
 export default styles;

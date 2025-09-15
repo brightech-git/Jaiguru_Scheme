@@ -1,6 +1,7 @@
 import { Dimensions, StyleSheet } from 'react-native';
 import { verticalScale, scale } from '../../utils/scaling';
 import { colors } from '../../utils';
+import { colors1 } from '../../utils/colors';
 
 const { height, width } = Dimensions.get('window');
 
@@ -10,6 +11,11 @@ const styles = StyleSheet.create({
     height: height * 0.08,
     flexDirection: 'row',
     backgroundColor: colors.white,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    // borderTopWidth: 1,
+    // borderTopColor: colors.lightGray,
+    // paddingHorizontal: scale(10),
     
   },
   footerBtnContainer: {
@@ -25,15 +31,15 @@ const styles = StyleSheet.create({
   },
   activeText: {
     marginTop: verticalScale(4),
-    color: colors.bottomColor,
-    fontSize: 10,
+    color: colors1.primaryText,
+    fontSize: 14,
 
     fontWeight: 'bold',
   },
   inactiveText: {
     marginTop: verticalScale(4),
     color: colors.darkGrayText,
-    fontSize: 10,
+    fontSize: 12,
   
     fontWeight: 'bold',
   },

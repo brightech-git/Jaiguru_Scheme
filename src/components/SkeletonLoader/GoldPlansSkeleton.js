@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import SkeletonLoader from './SkeletonLoader';
-import { scale, verticalScale } from '../../utils';
+import { scale, verticalScale, colors } from '../../utils';
 
 const GoldPlansSkeleton = () => {
   return (
@@ -39,12 +39,12 @@ const GoldPlansSkeleton = () => {
 const styles = StyleSheet.create({
   container: {
     padding: scale(15),
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.whiteColor,
     borderRadius: 10,
     marginVertical: verticalScale(8),
     marginHorizontal: scale(10),
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -74,17 +74,17 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#f1f2f3',
+    backgroundColor: colors.lightBrown,
     marginVertical: verticalScale(15),
   },
   darkSkeleton: {
-    backgroundColor: '#ccced3',
+    backgroundColor: colors.btncolor,
   },
   mediumSkeleton: {
-    backgroundColor: '#f1f2f3',
+    backgroundColor: colors.lightpink,
   },
   lightSkeleton: {
-    backgroundColor: '#f1f2f3',
+    backgroundColor: colors.lightyellow,
   },
 });
 

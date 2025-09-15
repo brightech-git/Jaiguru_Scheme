@@ -1,310 +1,219 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
   SafeAreaView,
   FlatList,
   StyleSheet,
-  Animated,
   TouchableOpacity,
-  Dimensions
 } from 'react-native';
 import { BackHeader } from '../../components';
-import { alignment, colors, scale } from '../../utils';
+import { colors, scale } from '../../utils';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Feather from 'react-native-vector-icons/Feather';
-
-const { width } = Dimensions.get('window');
-
-const formatDateTime = (dateTimeString) => {
-  if (!dateTimeString) return 'N/A';
-  try {
-    const date = new Date(dateTimeString);
-    if (isNaN(date.getTime())) return 'N/A';
-
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }) + ' • ' + date.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch (e) {
-    return 'N/A';
-  }
-};
-
-const PaymentItem = React.memo(({ item, index, animDelay }) => {
-  const translateY = useRef(new Animated.Value(50)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0.9)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.spring(translateY, {
-        toValue: 0,
-        delay: animDelay + (index * 100),
-        useNativeDriver: true,
-      }),
-      Animated.spring(opacity, {
-        toValue: 1,
-        delay: animDelay + (index * 100),
-        useNativeDriver: true,
-      }),
-      Animated.spring(scale, {
-        toValue: 1,
-        delay: animDelay + (index * 100),
-        useNativeDriver: true,
-      })
-    ]).start();
-  }, []);
-
-  return (
-    <Animated.View
-      style={[
-        styles.paymentItem,
-        {
-          opacity,
-          transform: [
-            { translateY },
-            { scale }
-          ],
-        },
-      ]}
-    >
-      <View style={styles.paymentContainer}>
-        <View style={styles.paymentHeader}>
-          <View style={styles.receiptContainer}>
-            <View style={styles.receiptIcon}>
-              <Feather name="credit-card" size={18} color="#FFFFFF" />
-            </View>
-            <Text style={styles.receiptText}>
-              RECEIPT #{item.receiptNo}
-            </Text>
-          </View>
-          <View style={styles.statusContainer}>
-            <Icon name="check-circle" size={16} color="#4CAF50" />
-            <Text style={styles.statusText}>PAID</Text>
-          </View>
-        </View>
-        
-        <View style={styles.paymentDetails}>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Installment:</Text>
-            <Text style={styles.detailValue}>INST. {item.installment}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Amount:</Text>
-            <Text style={[styles.detailValue, styles.amountText]}>
-              ₹{item.amount}
-            </Text>
-          </View>
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Date:</Text>
-            <Text style={styles.detailValue}>
-              {formatDateTime(item.updateTime)}
-            </Text>
-          </View>
-        </View>
-      </View>
-    </Animated.View>
-  );
-});
+import { colors1 } from '../../utils/colors';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const PaymentHistory = ({ navigation, route }) => {
-  const { accountDetails = { paymentHistoryList: [] }, schemeName = 'Payment Scheme' } = route.params || {};
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
-  const [paymentHistory, setPaymentHistory] = useState([]);
-  const headerScale = useRef(new Animated.Value(0.95)).current;
+  const { accountDetails, schemeName } = route.params;
+  const [sortOrder, setSortOrder] = useState('desc');
 
-  useEffect(() => {
-    if (Array.isArray(accountDetails?.paymentHistoryList)) {
-      const formatted = accountDetails.paymentHistoryList.map(payment => ({
-        receiptNo: payment?.receiptNo || `N/A-${Math.random().toString(36).substr(2, 5)}`,
-        installment: payment?.installment || 'N/A',
-        amount: payment?.amount || '0',
-        updateTime: payment?.updateTime || new Date().toISOString(),
-      }));
-      setPaymentHistory(formatted);
+  // Get payment history from accountDetails
+  const paymentHistory = accountDetails?.paymentHistoryList || [];
+
+  // Format date and time
+  const formatDateTime = useCallback((dateTimeString) => {
+    if (!dateTimeString) return 'N/A';
+    try {
+      const date = new Date(dateTimeString);
+      if (isNaN(date.getTime())) return 'Invalid Date';
+      return (
+        date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        }) +
+        ' ' +
+        date.toLocaleTimeString('en-GB', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        })
+      );
+    } catch (error) {
+      return 'Invalid Date';
     }
+  }, []);
 
-    // Header animation
-    Animated.spring(headerScale, {
-      toValue: 1,
-      delay: 100,
-      useNativeDriver: true,
-    }).start();
+  // Format date only
+  const formatDate = useCallback((dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid Date';
+      return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      });
+    } catch (error) {
+      return 'Invalid Date';
+    }
+  }, []);
 
-    // Content animations
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 600,
-        delay: 200,
-        useNativeDriver: true,
-      }),
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        friction: 8,
-        tension: 40,
-        delay: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [accountDetails]);
-
+  // Calculate summary statistics
   const totalAmountPaid = paymentHistory.reduce((total, payment) => {
-    const amt = parseFloat(payment.amount) || 0;
-    return total + amt;
+    return total + parseFloat(payment.amount || 0);
   }, 0);
 
-  const renderPaymentHistory = ({ item, index }) => (
-    <PaymentItem item={item} index={index} animDelay={400} />
-  );
+  const lastPaymentDate = paymentHistory.length > 0
+    ? paymentHistory[paymentHistory.length - 1].updateTime
+    : null;
+
+  const averagePaymentAmount = paymentHistory.length > 0
+    ? totalAmountPaid / paymentHistory.length
+    : 0;
+
+  // Sort payment history
+  const sortedHistory = [...paymentHistory].sort((a, b) => {
+    const dateA = new Date(a.updateTime || a.date);
+    const dateB = new Date(b.updateTime || b.date);
+    return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+  });
+
+  // Render payment history item
+  const renderPaymentHistory = useCallback(({ item, index }) => {
+    const isLastItem = index === paymentHistory.length - 1;
+    const status = item.status?.toLowerCase() || 'paid';
+    const isPaid = status === 'paid';
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.transactionCard,
+          isLastItem && styles.lastCard,
+          !isPaid && styles.pendingCard,
+        ]}
+        activeOpacity={0.7}
+        onPress={() => {
+          Alert.alert(
+            'Transaction Details',
+            `Installment: ${item.installment}\nAmount: ₹${item.amount}\nDate: ${formatDateTime(item.updateTime)}\nStatus: ${isPaid ? 'Paid' : 'Pending'}`,
+            [{ text: 'OK' }],
+          );
+        }}
+      >
+        <View style={styles.transactionLeft}>
+          <View style={[
+            styles.statusBadge,
+            { backgroundColor: isPaid ? colors1.success : colors1.warning },
+          ]}>
+            <Icon
+              name={isPaid ? 'check-circle' : 'clock-o'}
+              size={20}
+              color={colors.white}
+            />
+          </View>
+          <View style={styles.transactionDetails}>
+            <Text style={styles.transactionDate}>{formatDateTime(item.updateTime)}</Text>
+            <Text style={styles.transactionInstallment}>Installment {item.installment}</Text>
+            {item.receiptNo && (
+              <Text style={styles.receiptNo}>Receipt: {item.receiptNo}</Text>
+            )}
+          </View>
+        </View>
+        <View style={styles.transactionRight}>
+          <Text style={[
+            styles.transactionAmount,
+            !isPaid && { color: colors1.warning },
+          ]}>
+            ₹ {item.amount}
+          </Text>
+          <Text style={[
+            styles.statusText,
+            { color: isPaid ? colors1.success : colors1.warning },
+          ]}>
+            {isPaid ? 'Paid' : 'Pending'}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }, [formatDateTime]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <Animated.View style={{ transform: [{ scale: headerScale }] }}>
-        <View style={styles.headerContainer}>
-          <BackHeader
-            title="PAYMENT HISTORY"
-            backPressed={() => navigation.goBack()}
-            titleStyle={styles.headerTitle}
-            backColor="#FFFFFF"
-          />
-        </View>
-      </Animated.View>
-
-      <Animated.View
-        style={[
-          styles.content,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }],
-          },
-        ]}
+      <LinearGradient
+        colors={[colors1.primary, colors1.primaryDark]}
+        style={styles.headerGradient}
       >
-        {/* Summary Card */}
-        <Animated.View 
-          style={[
-            styles.summaryCard,
-            {
-              transform: [{
-                scale: fadeAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.9, 1]
-                })
-              }]
-            }
-          ]}
-        >
-          <View style={styles.summaryContainer}>
-            <Text style={styles.schemeTitle}>{schemeName}</Text>
-            <View style={styles.summaryGrid}>
-              <View style={styles.summaryItem}>
-                <Text style={styles.summaryLabel}>TOTAL PAID</Text>
-                <Animated.Text 
-                  style={[
-                    styles.summaryValue,
-                    {
-                      opacity: fadeAnim,
-                      transform: [{
-                        translateX: fadeAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [20, 0]
-                        })
-                      }]
-                    }
-                  ]}
-                >
-                  ₹{totalAmountPaid.toFixed(2)}
-                </Animated.Text>
-              </View>
-              <View style={styles.summaryDivider} />
-              <View style={styles.summaryItem}>
-                <Text style={styles.summaryLabel}>PAYMENTS</Text>
-                <Animated.Text 
-                  style={[
-                    styles.summaryValue,
-                    {
-                      opacity: fadeAnim,
-                      transform: [{
-                        translateX: fadeAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [20, 0]
-                        })
-                      }]
-                    }
-                  ]}
-                >
-                  {paymentHistory.length}
-                </Animated.Text>
-              </View>
+        <View style={styles.header}>
+          <BackHeader
+            title="Payment History"
+            backPressed={() => navigation.goBack()}
+            titleColor={colors.white}
+          />
+          <TouchableOpacity
+            style={styles.sortButton}
+            onPress={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+          >
+            <Icon
+              name={sortOrder === 'desc' ? 'sort-amount-desc' : 'sort-amount-asc'}
+              size={20}
+              color={colors.white}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.headerCard}>
+          <Text style={styles.schemeName}>
+            {schemeName || 'Scheme Payment History'}
+          </Text>
+          <View style={styles.headerStats}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                ₹ {totalAmountPaid.toLocaleString('en-IN')}
+              </Text>
+              <Text style={styles.statLabel}>Total Paid</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                {formatDate(lastPaymentDate)}
+              </Text>
+              <Text style={styles.statLabel}>Last Payment</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                ₹ {averagePaymentAmount.toFixed(0)}
+              </Text>
+              <Text style={styles.statLabel}>Avg. Payment</Text>
             </View>
           </View>
-        </Animated.View>
+        </View>
+      </LinearGradient>
 
-        {/* Payment History List */}
-        <View style={styles.historyContainer}>
-          <Animated.View 
-            style={[
-              styles.historyHeader,
-              {
-                opacity: fadeAnim,
-                transform: [{
-                  translateX: fadeAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0]
-                  })
-                }]
-              }
-            ]}
-          >
-            <Text style={styles.historyTitle}>TRANSACTION DETAILS</Text>
-            {/* <TouchableOpacity
-              style={styles.filterButton}
-              onPress={() => {}}
-              activeOpacity={0.7}
-            >
-              <Feather name="filter" size={16} color="#FFFFFF" />
-              <Text style={styles.filterText}>FILTER</Text>
-            </TouchableOpacity> */}
-          </Animated.View>
-
+      <View style={styles.content}>
+        <View style={styles.historySection}>
+          <Text style={styles.historyTitle}>Payment Details</Text>
           {paymentHistory.length > 0 ? (
             <FlatList
-              data={paymentHistory}
+              data={sortedHistory}
               renderItem={renderPaymentHistory}
-              keyExtractor={(item) => item.receiptNo}
+              keyExtractor={(item, index) => item.receiptNo || `${item.installment}-${index}`}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.listContainer}
             />
           ) : (
-            <Animated.View
-              style={[
-                styles.noDataContainer, 
-                { 
-                  opacity: fadeAnim,
-                  transform: [{
-                    scale: fadeAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.9, 1]
-                    })
-                  }]
-                }
-              ]}
-            >
-              <Feather name="inbox" size={48} color="#D4AF37" />
-              <Text style={styles.noDataText}>No Payment History</Text>
-              <Text style={styles.noDataSubtext}>
-                Your completed payments will appear here
+            <View style={styles.emptyState}>
+              <Icon name="inbox" size={48} color={colors1.borderLight} />
+              <Text style={styles.emptyStateText}>No transactions found</Text>
+              <Text style={styles.emptyStateSubtext}>
+                Your payment history will appear here
               </Text>
-            </Animated.View>
+            </View>
           )}
         </View>
-      </Animated.View>
+      </View>
     </SafeAreaView>
   );
 };
@@ -312,231 +221,176 @@ const PaymentHistory = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#EAF7FF', // Soft blue background
+    backgroundColor: colors1.background,
   },
-  headerContainer: {
-    backgroundColor: '#DCEEFF', // Light blue header
-    paddingTop: scale(10),
-    paddingBottom: scale(15),
-    borderBottomLeftRadius: scale(20),
-    borderBottomRightRadius: scale(20),
-    shadowColor: '#A0C4FF',
+  headerGradient: {
+    paddingBottom: scale(20),
+    borderBottomLeftRadius: scale(30),
+    borderBottomRightRadius: scale(30),
+    elevation: 8,
+    shadowColor: colors1.primaryDark,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
+    shadowRadius: 8,
   },
-  headerTitle: {
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: scale(20),
+    paddingTop: scale(10),
+  },
+  sortButton: {
+    width: scale(36),
+    height: scale(36),
+    borderRadius: scale(18),
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginHorizontal: scale(20),
+    marginTop: scale(10),
+    padding: scale(15),
+    borderRadius: scale(15),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  schemeName: {
     fontSize: scale(18),
-    fontFamily: 'TrajanPro-Bold',
-    color: '#1E2A38', // Deep navy
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+    fontWeight: '600',
+    color: colors.white,
+    marginBottom: scale(12),
+    textAlign: 'center',
+  },
+  headerStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statValue: {
+    fontSize: scale(16),
+    fontWeight: '600',
+    color: colors.white,
+    marginBottom: scale(4),
+  },
+  statLabel: {
+    fontSize: scale(12),
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '500',
+  },
+  statDivider: {
+    width: 1,
+    height: scale(35),
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
   content: {
     flex: 1,
-    padding: scale(16),
-  },
-  summaryCard: {
-    borderRadius: 20,
-    marginBottom: scale(20),
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#C0DAF7',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  summaryContainer: {
-    borderRadius: 20,
     padding: scale(20),
-    borderWidth: 1,
-    borderColor: '#CBE5FF',
-    backgroundColor: '#F6FAFD', // Subtle light background
   },
-  schemeTitle: {
-    color: '#1E2A38',
-    fontSize: scale(20),
-    fontFamily: 'TrajanPro-Bold',
-    marginBottom: scale(16),
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    textAlign: 'center',
-  },
-  summaryGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  summaryItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  summaryDivider: {
-    width: 1,
-    backgroundColor: '#CBE5FF',
-    marginHorizontal: scale(10),
-  },
-  summaryLabel: {
-    color: '#4A6A85',
-    fontSize: scale(12),
-    marginBottom: scale(6),
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    fontFamily: 'TrajanPro-Bold',
-  },
-  summaryValue: {
-    color: '#1E2A38',
-    fontSize: scale(20),
-    fontFamily: 'TrajanPro-Bold',
-  },
-  historyContainer: {
-    flex: 1,
-  },
-  historyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: scale(16),
-    paddingHorizontal: scale(5),
+  historySection: {
+    backgroundColor: colors.white,
+    borderRadius: scale(20),
+    padding: scale(20),
+    elevation: 3,
+    shadowColor: colors1.primaryDark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
   },
   historyTitle: {
-    fontSize: scale(16),
-    fontFamily: 'TrajanPro-Bold',
-    color: '#1E2A38',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(6),
-    backgroundColor: '#4A90E2',
-    borderRadius: 20,
-    shadowColor: '#A0C4FF',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  filterText: {
-    color: '#FFFFFF',
-    fontSize: scale(12),
-    fontFamily: 'TrajanPro-Bold',
-    marginLeft: scale(4),
-    textTransform: 'uppercase',
+    fontSize: scale(18),
+    fontWeight: '600',
+    color: colors1.primaryText,
+    marginBottom: scale(15),
   },
   listContainer: {
     paddingBottom: scale(20),
   },
-  paymentItem: {
-    marginBottom: scale(12),
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#A0C4FF',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  paymentContainer: {
-    padding: scale(16),
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#CBE5FF',
-  },
-  paymentHeader: {
+  transactionCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: scale(12),
-    paddingBottom: scale(8),
-    borderBottomWidth: 1,
-    borderBottomColor: '#DCEEFF',
+    backgroundColor: colors1.sectionBackground,
+    padding: scale(15),
+    borderRadius: scale(15),
+    marginBottom: scale(10),
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
-  receiptContainer: {
+  pendingCard: {
+    borderColor: colors1.warning,
+    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+  },
+  lastCard: {
+    marginBottom: 0,
+  },
+  transactionLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
-  receiptIcon: {
-    backgroundColor: '#D4AF37',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  statusBadge: {
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(20),
+    backgroundColor: colors1.success,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
+    marginRight: scale(12),
   },
-  receiptText: {
+  transactionDetails: {
+    flex: 1,
+  },
+  transactionDate: {
     fontSize: scale(14),
-    color: '#1E2A38',
-    fontFamily: 'TrajanPro-Bold',
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
+    fontWeight: '500',
+    color: colors1.primaryText,
+    marginBottom: scale(2),
   },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
-    paddingHorizontal: scale(10),
-    paddingVertical: scale(4),
-    borderRadius: 12,
+  transactionInstallment: {
+    fontSize: scale(12),
+    color: colors1.textSecondary,
+  },
+  receiptNo: {
+    fontSize: scale(10),
+    color: colors1.textSecondary,
+    marginTop: scale(2),
+  },
+  transactionRight: {
+    alignItems: 'flex-end',
+  },
+  transactionAmount: {
+    fontSize: scale(16),
+    fontWeight: '700',
+    color: colors1.primary,
+    marginBottom: scale(2),
   },
   statusText: {
-    fontSize: scale(12),
-    color: '#4CAF50',
-    fontFamily: 'TrajanPro-Bold',
-    marginLeft: scale(4),
-    textTransform: 'uppercase',
+    fontSize: scale(11),
+    fontWeight: '500',
   },
-  paymentDetails: {
-    gap: scale(10),
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  detailLabel: {
-    fontSize: scale(13),
-    color: '#4A6A85',
-    fontFamily: 'TrajanPro-Bold',
-  },
-  detailValue: {
-    fontSize: scale(13),
-    color: '#1E2A38',
-    fontFamily: 'TrajanPro-Bold',
-  },
-  amountText: {
-    color: '#D4AF37',
-    fontFamily: 'TrajanPro-Bold',
-    fontSize: scale(15),
-  },
-  noDataContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  emptyState: {
     alignItems: 'center',
     paddingVertical: scale(40),
   },
-  noDataText: {
-    color: '#4A6A85',
-    fontSize: scale(18),
-    fontFamily: 'TrajanPro-Bold',
-    marginTop: scale(16),
-    marginBottom: scale(8),
+  emptyStateText: {
+    fontSize: scale(16),
+    fontWeight: '600',
+    color: colors1.textSecondary,
+    marginTop: scale(15),
+    marginBottom: scale(5),
   },
-  noDataSubtext: {
-    color: '#6C87A5',
-    fontSize: scale(14),
+  emptyStateSubtext: {
+    fontSize: scale(13),
+    color: colors1.textSecondary,
+    opacity: 0.7,
     textAlign: 'center',
-    paddingHorizontal: scale(40),
-    lineHeight: scale(20),
-    fontFamily: 'TrajanPro-Bold',
   },
 });
 

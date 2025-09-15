@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
+import { colors } from '../../utils';
 
 const SkeletonLoader = ({ width, height, style }) => {
   const animatedValue = new Animated.Value(0);
@@ -23,7 +24,7 @@ const SkeletonLoader = ({ width, height, style }) => {
 
   const opacity = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.2, 0.5],
+    outputRange: [0.3, 0.7],
   });
 
   return (
@@ -43,14 +44,14 @@ const SkeletonLoader = ({ width, height, style }) => {
 
 const styles = StyleSheet.create({
   skeleton: {
-    backgroundColor: '#f1f2f3',
+    backgroundColor: colors.lightBrown,
     borderRadius: 8,
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.15,
     shadowRadius: 3.84,
     elevation: 5,
   },

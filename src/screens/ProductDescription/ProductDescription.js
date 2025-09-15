@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,243 +6,266 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  Image,
-  Animated,
-  Easing
+  ScrollView,
+  RefreshControl,
+  ActivityIndicator,
+  Share,
 } from 'react-native';
 import { BackHeader } from '../../components';
 import { alignment, colors, scale } from '../../utils';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import FeatherIcon from 'react-native-vector-icons/Feather';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors1 } from '../../utils/colors';
 
 const SchemePassbook = ({ navigation, route }) => {
-  const { productData, status, accountDetails } = route.params || {};
-  console.log(accountDetails);
-  console.log(productData)
+  const { productData, status, accountDetails } = route.params;
 
-  // Animation values
-  const [scaleValue] = useState(new Animated.Value(1));
-  const [fadeAnim] = useState(new Animated.Value(1));
+  // State management
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Extract user name and scheme name from accountDetails
-  const userName = accountDetails?.personalInfo?.pName || 'User Name';
-  const schemeName = accountDetails?.schemeSummary?.schemeName?.trim() || 'Scheme Name';
-  const isDreamGoldPlan = schemeName === 'DREAM GOLD PLAN';
+  const isDreamGoldPlan = accountDetails?.schemeSummary?.schemeName?.trim() === 'DREAM GOLD PLAN';
 
-  const formatDate = (dateString) => {
+  // Date formatting
+  const formatDate = useCallback((dateString) => {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).toUpperCase();
-  };
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid Date';
+      return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      });
+    } catch (error) {
+      return 'Invalid Date';
+    }
+  }, []);
 
-  const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString) return 'N/A';
-    const date = new Date(dateTimeString);
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).toUpperCase();
-  };
+  // Calculate scheme statistics
+  const schemeStats = useMemo(() => {
+    const totalPaid = parseFloat(productData?.amountWeight?.Amount || 0);
+    const goldSaved = parseFloat(productData?.amountWeight?.Weight || 0);
+    const installmentsPaid = accountDetails?.schemeSummary?.schemaSummaryTransBalance?.insPaid || 0;
+    const totalInstallments = accountDetails?.schemeSummary?.instalment || 0;
+    const progressPercentage = totalInstallments > 0 ? (installmentsPaid / totalInstallments) * 100 : 0;
 
-  // Get payment history from accountDetails
-  const paymentHistory = accountDetails?.paymentHistoryList || [];
-  const totalAmountPaid = accountDetails?.schemeSummary?.schemaSummaryTransBalance?.amtrecd || '0';
+    return {
+      totalPaid,
+      goldSaved,
+      installmentsPaid,
+      totalInstallments,
+      progressPercentage: Math.min(progressPercentage, 100),
+    };
+  }, [productData, accountDetails]);
 
-  // Calculate progress for installments
-  const insPaid = accountDetails?.schemeSummary?.schemaSummaryTransBalance?.insPaid || 0;
-  const totalIns = accountDetails?.schemeSummary?.instalment || 11;
-  const progress = totalIns ? (insPaid / totalIns) * 100 : 0;
+  // Pull-to-refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('Data refreshed');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to refresh data. Please try again.');
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
-  const handlePressIn = () => {
-    Animated.spring(scaleValue, {
-      toValue: 0.95,
-      useNativeDriver: true,
-    }).start();
-  };
+  // Share scheme details
+  const handleShare = useCallback(async () => {
+    try {
+      const message = `My ${productData?.pname || 'Gold Scheme'} Details:
+      
+Total Paid: ₹${schemeStats.totalPaid}
+${isDreamGoldPlan ? `Installments: ${schemeStats.installmentsPaid}/${schemeStats.totalInstallments}` : `Gold Saved: ${schemeStats.goldSaved}g`}
+Join Date: ${formatDate(productData?.joindate)}
+Maturity Date: ${formatDate(productData?.maturityDate)}`;
 
-  const handlePressOut = () => {
-    Animated.spring(scaleValue, {
-      toValue: 1,
-      friction: 3,
-      tension: 40,
-      useNativeDriver: true,
-    }).start();
-  };
+      await Share.share({
+        message,
+        title: 'Scheme Passbook Details',
+      });
+    } catch (error) {
+      console.log('Error sharing:', error);
+    }
+  }, [productData, schemeStats, isDreamGoldPlan, formatDate]);
 
-  const renderPaymentHistory = ({ item, index }) => {
+  // Simplified payment history card
+  const renderPaymentHistory = useCallback(({ item, index }) => {
+    const isLastItem = index === Math.min(2, accountDetails?.paymentHistoryList?.length - 1);
     return (
-      <Animated.View 
+      <View
         style={[
-          styles.transactionItem,
-          { 
-            opacity: fadeAnim,
-            transform: [{ scale: scaleValue }] 
-          }
+          styles.transactionCard,
+          isLastItem && styles.lastCard,
         ]}
       >
-        <View style={styles.statusContainer}>
-          <Icon name="check-circle" size={scale(14)} color="#4CAF50" style={styles.statusIcon} />
-          <Text style={styles.statusText}>PAID</Text>
+        <View style={styles.transactionLeft}>
+          <Text style={styles.transactionDate}>{formatDate(item.updateTime)}</Text>
+          <Text style={styles.transactionInstallment}>Installment {item.installment}</Text>
         </View>
-        <Text style={styles.transactionText}>{formatDateTime(item.updateTime)}</Text>
-        <Text style={styles.transactionWText}>INST. {item.installment || '1'}</Text>
-        <Text style={styles.transactioninrText}>₹ {item.amount || '0'}</Text>
-      </Animated.View>
+        <View style={styles.transactionRight}>
+          <Text style={styles.transactionAmount}>₹ {item.amount}</Text>
+        </View>
+      </View>
     );
-  };
+  }, [formatDate]);
+
+  // Progress bar component
+  const ProgressBar = () => (
+    <View style={styles.progressContainer}>
+      <View style={styles.progressBarBackground}>
+        <View
+          style={[
+            styles.progressBarFill,
+            { width: `${schemeStats.progressPercentage}%` },
+          ]}
+        />
+      </View>
+      <Text style={styles.progressText}>
+        {schemeStats.progressPercentage.toFixed(1)}% Complete
+      </Text>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
-      <BackHeader
-        title="SCHEME PASSBOOK"
-        backPressed={() => navigation.goBack()}
-        titleStyle={styles.headerTitle}
-      />
-
-      <View style={styles.content}>
-        {/* Gold Header Box with subtle animation */}
-        <Animated.View 
-          style={[
-            styles.goldBox,
-            { 
-              transform: [{ 
-                translateY: fadeAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [-50, 0]
-                }) 
-              }] 
-            }
-          ]}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[colors1.primary]}
+            tintColor={colors1.primary}
+          />
+        }
+      >
+        <LinearGradient
+          colors={[colors1.primary, colors1.primaryDark]}
+          style={styles.headerGradient}
         >
-          <Text style={styles.userName}>{userName}</Text>
-        </Animated.View>
-
-        {/* Info Section */}
-        <Animated.View 
-          style={[
-            styles.infoContainer,
-            { 
-              opacity: fadeAnim,
-              transform: [{ scale: scaleValue }] 
-            }
-          ]}
-        >
-          <View style={styles.schemeHeaderRow}>
-            <Image
-              source={require('../../assets/image/gold2.jpg')}
-              style={styles.schemeIcon}
-              resizeMode='contain'
+          <View style={styles.headerTop}>
+            <BackHeader
+              title="Scheme Passbook"
+              backPressed={() => navigation.goBack()}
+              titleColor={colors.white}
             />
-            <Text style={styles.schemeTitle}>
-              {schemeName}
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={handleShare}
+            >
+              <MaterialIcons name="share" size={20} color={colors.white} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.headerCard}>
+            <Text style={styles.schemeName}>
+              {productData?.pname || 'Scheme Name'}
             </Text>
-          </View>
 
-          <View style={styles.infoRow}>
-            <View style={styles.infoColumnLeft}>
-              <Text style={styles.infoLabel}>TOTAL AMOUNT</Text>
-              <Text style={styles.infoValue}>₹ {totalAmountPaid}</Text>
-            </View>
-            <View style={styles.infoColumnRight}>
-              <Text style={styles.infoLabel}>AVERAGE RATE /G</Text>
-              <Text style={styles.infoValue}>
-                ₹ {totalAmountPaid}
-              </Text>
-            </View>
-          </View>
+            {isDreamGoldPlan && <ProgressBar />}
 
-          <View style={styles.infoRow}>
-            <View style={styles.infoColumnLeft}>
-              <Text style={styles.infoLabel}>INSTALLMENTS PAID</Text>
-              <Text style={styles.infoValue}>
-                {insPaid} / {totalIns}
-              </Text>
-              
-              {/* Progress Bar with animation */}
-              <View style={styles.progressBackground}>
-                <Animated.View
-                  style={[
-                    styles.progressFill, 
-                    { 
-                      width: progress + '%',
-                      opacity: fadeAnim 
-                    }
-                  ]}
-                />
+            <View style={styles.headerStats}>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>
+                  ₹ {schemeStats.totalPaid.toLocaleString('en-IN')}
+                </Text>
+                <Text style={styles.statLabel}>Total Paid</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>
+                  {isDreamGoldPlan
+                    ? `${schemeStats.installmentsPaid}/${schemeStats.totalInstallments}`
+                    : `${schemeStats.goldSaved}g`}
+                </Text>
+                <Text style={styles.statLabel}>
+                  {isDreamGoldPlan ? 'Installments' : 'Gold Saved'}
+                </Text>
               </View>
             </View>
           </View>
+        </LinearGradient>
 
-          <View style={styles.infoRow}>
-            <View style={styles.infoColumnLeft}>
-              <Text style={styles.infoLabel}>DATE OF JOIN</Text>
-              <Text style={styles.infoValue}>
-                {formatDate(productData?.joindate) || 'N/A'}
+        <View style={styles.content}>
+          <View style={styles.infoCardsContainer}>
+            <TouchableOpacity style={styles.infoCard}>
+              <Icon name="calendar" size={20} color={colors1.primary} />
+              <Text style={styles.infoCardLabel}>Join Date</Text>
+              <Text style={styles.infoCardValue}>
+                {formatDate(productData?.joindate)}
               </Text>
-            </View>
-            <View style={styles.infoColumnRight}>
-              <Text style={styles.infoLabel}>DATE OF MATURITY</Text>
-              <Text style={styles.infoValue}>
-                {formatDate(productData?.maturityDate) || 'N/A'}
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.infoCard}>
+              <Icon name="calendar-check-o" size={20} color={colors1.primary} />
+              <Text style={styles.infoCardLabel}>Maturity Date</Text>
+              <Text style={styles.infoCardValue}>
+                {formatDate(productData?.maturityDate)}
               </Text>
-            </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.infoCard}>
+              <Icon name="line-chart" size={20} color={colors1.primary} />
+              <Text style={styles.infoCardLabel}>Avg Rate</Text>
+              <Text style={styles.infoCardValue}>
+                ₹ {(schemeStats.totalPaid / Math.max(schemeStats.goldSaved, 1)).toFixed(0)}/g
+              </Text>
+            </TouchableOpacity>
           </View>
-        </Animated.View>
 
-        {/* Transaction History */}
-        <Animated.View 
-          style={[
-            styles.transactionContainer,
-            { opacity: fadeAnim }
-          ]}
-        >
-          <View style={styles.transactionHeaderRow}>
-            <Text style={styles.transactionHeader}>TRANSACTION HISTORY</Text>
-            {paymentHistory.length > 0 && (
-              <TouchableOpacity
-                style={styles.viewFullHistoryButton}
-                onPress={() => navigation.navigate('PaymentHistory', {
-                  accountDetails: accountDetails,
-                  schemeName: schemeName
-                })}
-                onPressIn={handlePressIn}
-                onPressOut={handlePressOut}
-                activeOpacity={0.7}
-              >
-                <FeatherIcon name="eye" size={scale(14)} color="#FFF" />
-                <Text style={styles.viewFullHistoryText}> VIEW ALL</Text>
-              </TouchableOpacity>
+          <View style={styles.historySection}>
+            <View style={styles.historyHeader}>
+              <Text style={styles.historyTitle}>
+                Recent Payments ({accountDetails?.paymentHistoryList?.length || 0})
+              </Text>
+              {accountDetails?.paymentHistoryList?.length > 0 && (
+                <TouchableOpacity
+                  style={styles.viewAllButton}
+                    onPress={() => navigation.navigate('PaymentHistory', {
+    accountDetails: accountDetails,
+    schemeName: productData?.pname,
+  })
+  }
+                >
+                  <Text style={styles.viewAllText}>View All</Text>
+                  <Icon
+                    name="chevron-right"
+                    size={12}
+                    color={colors1.primary}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={colors1.primary} />
+                <Text style={styles.loadingText}>Loading transactions...</Text>
+              </View>
+            ) : accountDetails?.paymentHistoryList?.length > 0 ? (
+              <View style={styles.transactionsList}>
+                {accountDetails?.paymentHistoryList.slice(0, 3).map((item, index) => (
+                  <View key={item.receiptNo || `${item.installment}-${index}`}>
+                    {renderPaymentHistory({ item, index })}
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View style={styles.emptyState}>
+                <Icon name="inbox" size={48} color={colors1.borderLight} />
+                <Text style={styles.emptyStateText}>No transactions found</Text>
+                <Text style={styles.emptyStateSubtext}>
+                  Your payment history will appear here
+                </Text>
+              </View>
             )}
           </View>
-
-          {/* Payment History List Headers */}
-          <View style={styles.transactionColumnHeaderRow}>
-            <Text style={styles.headerText}>STATUS</Text>
-            <Text style={styles.headerText}>DATE</Text>
-            <Text style={styles.headerText}>TOTAL</Text>
-            <Text style={styles.headerText}>AMOUNT INR</Text>
-          </View>
-
-          {/* FlatList for Payment History */}
-          {paymentHistory.length > 0 ? (
-            <FlatList
-              data={paymentHistory.slice(0, 3)}
-              renderItem={renderPaymentHistory}
-              keyExtractor={(item, index) => index.toString()}
-              showsVerticalScrollIndicator={false}
-            />
-          ) : (
-            <View style={styles.noDataContainer}>
-              <Text style={styles.noDataText}>No payment history available</Text>
-            </View>
-          )}
-        </Animated.View>
-      </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -250,236 +273,222 @@ const SchemePassbook = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#EAF7FF', // Base theme color
+    backgroundColor: colors1.background,
   },
-  headerTitle: {
-    fontSize: scale(18),
-    fontWeight: 'bold',
-    color: '#004E89', // Dark blue accent
-    textTransform: 'uppercase',
-    fontFamily: 'TrajanPro-Bold',
-    letterSpacing: 1
-  },
-  content: {
-    flex: 1,
-    padding: scale(12),
-  },
-  goldBox: {
-    height: scale(40),
-    backgroundColor: '#B6E3FF', // Light blue header
-    borderTopLeftRadius: scale(12),
-    borderTopRightRadius: scale(12),
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: scale(10),
-    shadowColor: '#A8CBE5',
+  headerGradient: {
+    paddingBottom: scale(20),
+    borderBottomLeftRadius: scale(30),
+    borderBottomRightRadius: scale(30),
+    elevation: 8,
+    shadowColor: colors1.primaryDark,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 6,
+    shadowRadius: 8,
   },
-  userName: {
-    fontSize: scale(16),
-    color: '#003B73',
-    textTransform: 'uppercase',
-    fontFamily: 'TrajanPro-Bold',
-    letterSpacing: 1
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  infoContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: scale(12),
-    padding: scale(20),
-    shadowColor: '#D0E4F7',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 8,
+  actionButton: {
+    width: scale(36),
+    height: scale(36),
+    borderRadius: scale(18),
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: scale(20),
+  },
+  headerCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginHorizontal: scale(20),
+    marginTop: scale(10),
+    padding: scale(15),
+    borderRadius: scale(15),
     borderWidth: 1,
-    borderColor: '#C2E2F2',
-    marginBottom: scale(20),
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
-  schemeHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: scale(15),
-    borderBottomWidth: 1,
-    borderBottomColor: '#D9F0FB',
-    paddingBottom: scale(10),
-  },
-  schemeIcon: {
-    width: scale(32),
-    height: scale(32),
-    marginRight: scale(12),
-    borderRadius: scale(16),
-  },
-  schemeTitle: {
+  schemeName: {
     fontSize: scale(18),
-    color: '#004E89',
-    fontFamily: 'TrajanPro-Bold',
-    letterSpacing: 0.5
+    fontWeight: '600',
+    color: colors.white,
+    marginBottom: scale(12),
+    textAlign: 'center',
   },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: scale(16),
+  progressContainer: {
+    marginBottom: scale(12),
   },
-  infoLabel: {
-    fontSize: scale(12),
-    color: '#0077B6',
-    marginBottom: scale(6),
-    textTransform: 'uppercase',
-    fontFamily: 'TrajanPro-Bold',
-    letterSpacing: 0.5
-  },
-  infoValue: {
-    fontSize: scale(16),
-    color: '#002B5B',
-    fontFamily: 'TrajanPro-Bold',
-  },
-  infoColumnLeft: {
-    flex: 1,
-  },
-  infoColumnRight: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  progressBackground: {
-    width: '100%',
+  progressBarBackground: {
     height: scale(6),
-    backgroundColor: '#D6EEFF',
-    borderRadius: scale(4),
-    marginTop: scale(8),
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#0077B6',
-    borderRadius: scale(4),
-  },
-  transactionContainer: {
-    flex: 1,
-  },
-  transactionHeader: {
-    fontSize: scale(14),
-    color: '#003B73',
-    marginBottom: scale(12),
-    textTransform: 'uppercase',
-    fontFamily: 'TrajanPro-Bold',
-    letterSpacing: 1
-  },
-  transactionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: scale(12),
-  },
-  transactionColumnHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: scale(10),
-    borderBottomWidth: 1,
-    borderColor: '#B6E3FF',
-    backgroundColor: '#E6F6FF',
-    borderRadius: scale(8),
-    paddingHorizontal: scale(12),
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: scale(3),
     marginBottom: scale(8),
   },
-  headerText: {
-    fontSize: scale(12),
-    color: '#004E89',
-    flex: 1,
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    fontFamily: 'TrajanPro-Bold',
-    letterSpacing: 0.5
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: colors.white,
+    borderRadius: scale(3),
   },
-  transactionItem: {
+  progressText: {
+    fontSize: scale(12),
+    color: 'rgba(255, 255, 255, 0.9)',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  headerStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: scale(20),
+    fontWeight: '600',
+    color: colors.white,
+    marginBottom: scale(4),
+  },
+  statLabel: {
+    fontSize: scale(12),
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '500',
+  },
+  statDivider: {
+    width: 1,
+    height: scale(35),
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  content: {
+    padding: scale(20),
+  },
+  infoCardsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: scale(12),
-    borderBottomWidth: 1,
-    borderBottomColor: '#D6EEFF',
-    paddingHorizontal: scale(12),
+    marginTop: scale(-30),
+    marginBottom: scale(25),
+  },
+  infoCard: {
+    backgroundColor: colors.white,
+    flex: 1,
+    marginHorizontal: scale(5),
+    padding: scale(15),
+    borderRadius: scale(15),
     alignItems: 'center',
-    backgroundColor: '#F7FBFF',
-    borderRadius: scale(6),
-    marginVertical: scale(4),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  statusText: {
-    fontSize: scale(12),
-    color: '#00B894',
-    flex: 1,
-    textAlign: 'center',
-    fontFamily: 'TrajanPro-Bold',
-    textTransform: 'uppercase'
-  },
-  statusIcon: {
-    marginRight: scale(6),
-  },
-  transactionText: {
-    fontSize: scale(12),
-    color: '#004E89',
-    flex: 1,
-    textAlign: 'center',
-    fontFamily: 'TrajanPro-Bold',
-  },
-  transactionWText: {
-    fontSize: scale(12),
-    color: '#004E89',
-    flex: 1,
-    textAlign: 'center',
-    fontFamily: 'TrajanPro-Bold',
-    textTransform: 'uppercase'
-  },
-  transactioninrText: {
-    fontSize: scale(12),
-    color: '#0089C0',
-    flex: 1,
-    textAlign: 'center',
-    fontFamily: 'TrajanPro-Bold',
-  },
-  noDataContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: scale(20),
-  },
-  noDataText: {
-    color: '#004E89',
-    fontSize: scale(12),
-    opacity: 0.5,
-    fontFamily: 'TrajanPro-Bold'
-  },
-  viewFullHistoryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(7),
-    backgroundColor: '#0077B6',
-    borderRadius: scale(16),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
     elevation: 4,
+    shadowColor: colors1.primaryDark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  viewFullHistoryText: {
-    color: '#FFFFFF',
+  infoCardLabel: {
+    fontSize: scale(11),
+    color: colors1.textSecondary,
+    marginTop: scale(8),
+    marginBottom: scale(4),
+  },
+  infoCardValue: {
+    fontSize: scale(13),
+    fontWeight: '600',
+    color: colors1.primaryText,
+    textAlign: 'center',
+  },
+  historySection: {
+    backgroundColor: colors.white,
+    borderRadius: scale(20),
+    padding: scale(20),
+    elevation: 3,
+    shadowColor: colors1.primaryDark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+  },
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: scale(15),
+  },
+  historyTitle: {
+    fontSize: scale(18),
+    fontWeight: '600',
+    color: colors1.primaryText,
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors1.sectionBackground,
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(6),
+    borderRadius: scale(20),
+  },
+  viewAllText: {
+    fontSize: scale(13),
+    color: colors1.primary,
+    fontWeight: '600',
+    marginRight: scale(4),
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: scale(30),
+  },
+  loadingText: {
+    marginTop: scale(10),
+    fontSize: scale(14),
+    color: colors1.textSecondary,
+  },
+  transactionsList: {
+    marginTop: scale(5),
+  },
+  transactionCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors1.sectionBackground,
+    padding: scale(12),
+    borderRadius: scale(12),
+    marginBottom: scale(8),
+  },
+  lastCard: {
+    marginBottom: 0,
+  },
+  transactionLeft: {
+    flex: 1,
+  },
+  transactionDate: {
+    fontSize: scale(14),
+    fontWeight: '500',
+    color: colors1.primaryText,
+    marginBottom: scale(2),
+  },
+  transactionInstallment: {
     fontSize: scale(12),
-    fontFamily: 'TrajanPro-Bold',
-    marginLeft: scale(4),
-    textTransform: 'uppercase'
+    color: colors1.textSecondary,
+  },
+  transactionRight: {
+    alignItems: 'flex-end',
+  },
+  transactionAmount: {
+    fontSize: scale(14),
+    fontWeight: '600',
+    color: colors1.primary,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: scale(40),
+  },
+  emptyStateText: {
+    fontSize: scale(16),
+    fontWeight: '600',
+    color: colors1.textSecondary,
+    marginTop: scale(15),
+    marginBottom: scale(5),
+  },
+  emptyStateSubtext: {
+    fontSize: scale(13),
+    color: colors1.textSecondary,
+    opacity: 0.7,
+    textAlign: 'center',
   },
 });
 

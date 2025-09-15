@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  ImageBackground,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, ImageBackground, Alert } from 'react-native';
 import styles from './styles';
 import React, { useEffect, useState } from 'react';
 import BottomTab from '../../components/BottomTab/BottomTab';
@@ -23,110 +16,119 @@ function DiscoverPlace({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [status, setStatus] = useState(true);
+  const [accountDetails, setAccountDetails] = useState(null);
+
+  const fetchAccountDetails = async (regno, groupcode) => {
+    try {
+      const response = await fetch(`https://akj.brightechsoftware.com/v1/api/account?regno=${regno}&groupcode=${groupcode}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Account details HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setAccountDetails(data);
+    } catch (error) {
+      console.error('Error fetching account details:', error);
+      Alert.alert('Error', 'Failed to fetch account details');
+    }
+  };
 
   useEffect(() => {
     const fetchPhoneSearchData = async () => {
       const storedPhoneNumber = await AsyncStorage.getItem('userPhoneNumber');
-      console.log('Phone Number:', storedPhoneNumber);
-
+      console.log(storedPhoneNumber)
       try {
-        const phoneResponse = await fetch(
-          `https://akj.brightechsoftware.com/v1/api/account/phonesearch?phoneNo=${storedPhoneNumber}`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-            },
+        const phoneResponse = await fetch(`https://akj.brightechsoftware.com/v1/api/account/phonesearch?phoneNo=${storedPhoneNumber}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           }
-        );
+        });
 
         if (!phoneResponse.ok) {
           throw new Error(`Phone Search HTTP error! status: ${phoneResponse.status}`);
         }
 
         const phoneJson = await phoneResponse.json();
-        console.log('Phone JSON:', phoneJson);
-
+        
         if (phoneJson && phoneJson.length > 0) {
           setPhoneSearchData(phoneJson);
-
+          
           const productPromises = phoneJson.map(async (item) => {
-            if (!item.regno || !item.groupcode) {
-              console.warn('Skipping item with missing regno or groupcode:', item);
-              return null;
-            }
-
             try {
-              const accountRes = await fetch(
-                `https://akj.brightechsoftware.com/v1/api/account?regno=${item.regno}&groupcode=${item.groupcode}`,
+              // Fetch account details for each item
+              const accountResponse = await fetch(`https://akj.brightechsoftware.com/v1/api/account?regno=${item.regno}&groupcode=${item.groupcode}`, {
+                method: 'GET',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                }
+              });
+
+              if (!accountResponse.ok) {
+                throw new Error(`Account details HTTP error! status: ${accountResponse.status}`);
+              }
+
+              const accountData = await accountResponse.json();
+
+              const amountWeightResponse = await fetch(
+                `https://akj.brightechsoftware.com/v1/api/getAmountWeight?REGNO=${item.regno}&GROUPCODE=${item.groupcode}`, 
                 {
                   method: 'GET',
                   headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                  },
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                  }
                 }
               );
 
-              if (!accountRes.ok) {
-                console.warn(
-                  `Account fetch failed for REGNO: ${item.regno}, GROUPCODE: ${item.groupcode}, Status: ${accountRes.status}`
-                );
-                return null;
+              if (!amountWeightResponse.ok) {
+                throw new Error(`Amount Weight HTTP error! status: ${amountWeightResponse.status}`);
               }
 
-              const accountData = await accountRes.json();
-
-              const weightRes = await fetch(
-                `https://akj.brightechsoftware.com/v1/api/getAmountWeight?REGNO=${item.regno}&GROUPCODE=${item.groupcode}`,
-                {
-                  method: 'GET',
-                  headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                  },
-                }
-              );
-
-              if (!weightRes.ok) {
-                console.warn(
-                  `AmountWeight fetch failed for REGNO: ${item.regno}, GROUPCODE: ${item.groupcode}`
-                );
-                return null;
-              }
-
-              const weightJson = await weightRes.json();
-
-              const isActive = !item.maturitydate;
+              const amountWeightJson = await amountWeightResponse.json();
+              const isActive = !(item.maturitydate);
               const itemStatus = isActive ? 'Active' : 'Deactive';
               setStatus(itemStatus);
 
               return {
                 ...item,
-                amountWeight: weightJson[0] || null,
+                amountWeight: amountWeightJson[0] || null,
                 status: itemStatus,
-                accountDetails: accountData,
+                accountDetails: accountData // Pass the account data directly
               };
-            } catch (err) {
-              console.error('Error fetching data for item:', item, err);
-              return null;
+            } catch (amountError) {
+              console.error('Error fetching data:', amountError);
+              return {
+                ...item,
+                amountWeight: null,
+                status: 'Deactive',
+                accountDetails: null
+              };
             }
           });
-
-          const resolvedData = await Promise.all(productPromises);
-          const validProducts = resolvedData.filter((item) => item && item.amountWeight);
-          setProductData(validProducts);
-
-          if (validProducts.length === 0) {
+          
+          const resolvedProductData = await Promise.all(productPromises);
+          const validProductData = resolvedProductData.filter(item => item.amountWeight !== null);
+          setProductData(validProductData);
+          
+          if (validProductData.length === 0) {
             setError('No valid product data found');
           }
         } else {
           setError('No phone search data available');
         }
       } catch (err) {
-        console.error('Fetch error:', err);
-        setError(`Failed to load data: ${err.message}`);
+        console.error('Detailed fetch error:', err);
+        setError(`Failed fetch data: ${err.message}`);
         Alert.alert('Fetch Error', `Failed to load data: ${err.message}`);
       } finally {
         setLoading(false);
@@ -139,14 +141,17 @@ function DiscoverPlace({ navigation }) {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require('../../assets/otpbg.jpg')}
+        source={require('../../assets/bg.jpg')}
         style={styles.mainBackground}
         imageStyle={styles.backgroundImageStyle}
       >
         <SafeAreaView style={styles.safeArea}>
           {/* Back Button */}
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={24} color={colors.greenColor} />
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <MaterialIcons name="arrow-back" size={24} color={colors.textBlueColor} />
           </TouchableOpacity>
 
           {/* Title */}
@@ -179,9 +184,7 @@ function DiscoverPlace({ navigation }) {
                   />
                 ))
               ) : (
-                <TextDefault style={styles.titleSpacer1}>
-                  No Schemes available for Your Account
-                </TextDefault>
+                <TextDefault textColor={colors.redColor}>No products available.</TextDefault>
               )}
             </View>
           </ScrollView>

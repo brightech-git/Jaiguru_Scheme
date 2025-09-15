@@ -1,333 +1,343 @@
-import React from "react";
+import React from 'react'
 import {
   View,
   Text,
-  Linking,
-  TouchableOpacity,
-  Dimensions,
+  StyleSheet,
   ScrollView,
-  StyleSheet
-} from "react-native";
-import { Feather, Entypo, FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { LinearGradient } from 'expo-linear-gradient';
-import { scale, verticalScale } from "../../utils/scaling";
-import { colors } from "../../utils/colors";
+  TouchableOpacity,
+  Linking,
+  Dimensions
+} from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import Icon from 'react-native-vector-icons/MaterialIcons'
+import { LinearGradient } from 'expo-linear-gradient'
+import { colors, scale, verticalScale } from '../../utils'
+import { colors1 } from '../../utils/colors'
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window')
+const SUPPORT_NUMBER = '919514333601' // ✅ Add your WhatsApp support number (with country code)
 
-const HelpCenter = ({ navigation }) => {
-  const openMap = (query) => {
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-    Linking.openURL(url);
-  };
+function HelpCenterPage() {
+  const handlePhoneCall = (phoneNumber) => {
+    Linking.openURL(`tel:${phoneNumber}`)
+  }
 
-  const handleCall = (number) => Linking.openURL(`tel:${number}`);
-  const handleMail = (email) => Linking.openURL(`mailto:${email}`);
+  const handleEmail = (email) => {
+    Linking.openURL(`mailto:${email}`)
+  }
 
+  const handleOpenMap = () => {
+    const address =
+      'M/s. BMG Jewellers Pvt Ltd, 160, Melamasi St, Madurai-625001'
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+    Linking.openURL(url)
+  }
+
+  const handleWhatsApp = (message) => {
+    const url = `https://wa.me/${SUPPORT_NUMBER}?text=${encodeURIComponent(message)}`
+    Linking.openURL(url).catch(() => {
+      alert('Make sure WhatsApp is installed')
+    })
+  }
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <LinearGradient
-        colors={['#f8f8f8', '#ffffff']}
-        style={styles.headerContainer}
-      >
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <Ionicons name="arrow-back" size={scale(24)} color={colors.primaryGold1} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Help Center</Text>
-        <View style={styles.headerRight} />
-      </LinearGradient>
-
-      <ScrollView 
+    <SafeAreaView style={styles.container}>
+      <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
+        {/* Header Section */}
+        <LinearGradient
+          colors={colors1.gradientPrimary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
+          <Text style={styles.title}>Help Center</Text>
+          <Text style={styles.subtitle}>We're here to help you</Text>
+        </LinearGradient>
+
         {/* Contact Cards */}
-        <View style={styles.cardContainer}>
-          {/* Main Branch */}
+        <View style={styles.cardsContainer}>
+          {/* Phone Numbers Card */}
           <LinearGradient
-            colors={['#ffffff', '#f9f9f9']}
+            colors={['#FFF9E6', '#FFEDCC']}
             style={styles.card}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
           >
             <View style={styles.cardHeader}>
-              <MaterialIcons name="store" size={scale(22)} color={colors.primaryGold1} />
-              <Text style={styles.cardTitle}>Main Branch</Text>
+              <View style={[styles.iconContainer, styles.phoneIconContainer]}>
+                <Icon name='phone' size={24} color={colors1.primary} />
+              </View>
+              <Text style={styles.cardTitle}>Phone Numbers</Text>
             </View>
+
             <TouchableOpacity
-              style={styles.cardContent}
-              onPress={() => openMap("68 Ellis Road, Mount Road, Chennai")}
+              style={styles.contactItem}
+              onPress={() => handlePhoneCall('919514333601')}
             >
-              <MaterialIcons name="location-on" size={scale(20)} color={colors.primaryGold1} />
-              <Text style={styles.cardText}>
-                Old # 52, New # 68, Ellis Road,{"\n"}
-                Mount Road, Chennai 600002,{"\n"}
-                Tamilnadu, India.
-              </Text>
+              <Text style={styles.contactText}>+91-95143 33601</Text>
+              <Icon name='call' size={20} color={colors1.primary} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.contactItem}
+              onPress={() => handlePhoneCall('919514333609')}
+            >
+              <Text style={styles.contactText}>+91-95143 33609</Text>
+              <Icon name='call' size={20} color={colors1.primary} />
             </TouchableOpacity>
           </LinearGradient>
 
-          {/* Contact Us */}
+          {/* Email Card */}
           <LinearGradient
-            colors={['#ffffff', '#f9f9f9']}
+            colors={['#FFF9E6', '#FFEDCC']}
             style={styles.card}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
           >
             <View style={styles.cardHeader}>
-              <Feather name="phone" size={scale(22)} color={colors.primaryGold1} />
-              <Text style={styles.cardTitle}>Contact Us</Text>
+              <View style={[styles.iconContainer, styles.emailIconContainer]}>
+                <Icon name='email' size={24} color={colors1.primary} />
+              </View>
+              <Text style={styles.cardTitle}>Email Address</Text>
             </View>
-            <TouchableOpacity 
-              style={styles.cardContent}
-              onPress={() => handleMail("Jaigurujewellers2023@gmail.com")}
+
+            <TouchableOpacity
+              style={styles.contactItem}
+              onPress={() => handleEmail('Contact@bmgjewellers.in')}
             >
-              <MaterialIcons name="email" size={scale(20)} color={colors.primaryGold1} />
-              <Text style={[styles.cardText, styles.linkText]}>
-                Jaigurujewellers2023@gmail.com
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.cardContent}
-              onPress={() => handleCall("04442157157")}
-            >
-              <Feather name="phone-call" size={scale(20)} color={colors.primaryGold1} />
-              <Text style={[styles.cardText, styles.linkText]}>04442157157</Text>
+              <Text style={styles.contactText}>Contact@bmgjewellers.in</Text>
+              <Icon name='mail-outline' size={20} color={colors1.primary} />
             </TouchableOpacity>
           </LinearGradient>
 
-          {/* Additional Numbers */}
+          {/* Office Address Card */}
           <LinearGradient
-            colors={['#ffffff', '#f9f9f9']}
+            colors={['#FFF9E6', '#FFEDCC']}
             style={styles.card}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
           >
             <View style={styles.cardHeader}>
-              <Feather name="smartphone" size={scale(22)} color={colors.primaryGold1} />
-              <Text style={styles.cardTitle}>Additional Contacts</Text>
-            </View>
-            {["04428588888", "04428580506"].map((num, idx) => (
-              <TouchableOpacity 
-                key={idx} 
-                style={styles.cardContent}
-                onPress={() => handleCall(num)}
+              <View
+                style={[styles.iconContainer, styles.locationIconContainer]}
               >
-                <Feather name="phone" size={scale(20)} color={colors.primaryGold1} />
-                <Text style={[styles.cardText, styles.linkText]}>{num}</Text>
-              </TouchableOpacity>
-            ))}
-          </LinearGradient>
+                <Icon name='location-on' size={24} color={colors1.primary} />
+              </View>
+              <Text style={styles.cardTitle}>Office Address</Text>
+            </View>
 
-          {/* Business Hours */}
-          <LinearGradient
-            colors={['#ffffff', '#f9f9f9']}
-            style={styles.card}
-          >
-            <View style={styles.cardHeader}>
-              <MaterialIcons name="access-time" size={scale(22)} color={colors.primaryGold1} />
-              <Text style={styles.cardTitle}>Business Hours</Text>
-            </View>
-            <View style={styles.cardContent}>
-              <MaterialIcons name="schedule" size={scale(20)} color={colors.primaryGold1} />
-              <Text style={styles.cardText}>
-                Monday - Saturday: 10AM - 8PM{"\n"}
-                Sunday: 11AM - 6PM
-              </Text>
-            </View>
-          </LinearGradient>
-
-          {/* Showroom Address */}
-          <LinearGradient
-            colors={['#ffffff', '#f9f9f9']}
-            style={styles.card}
-          >
-            <View style={styles.cardHeader}>
-              <MaterialIcons name="storefront" size={scale(22)} color={colors.primaryGold1} />
-              <Text style={styles.cardTitle}>Showroom Address</Text>
-            </View>
             <TouchableOpacity
-              style={styles.cardContent}
-              onPress={() => openMap("160 Melamasi Street, Madurai")}
+              style={styles.contactItem}
+              onPress={handleOpenMap}
             >
-              <MaterialIcons name="place" size={scale(20)} color={colors.primaryGold1} />
-              <Text style={styles.cardText}>160, Melamasi Street, Madurai - 625001</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-
-          {/* Registered Office */}
-          <LinearGradient
-            colors={['#ffffff', '#f9f9f9']}
-            style={styles.card}
-          >
-            <View style={styles.cardHeader}>
-              <MaterialIcons name="business" size={scale(22)} color={colors.primaryGold1} />
-              <Text style={styles.cardTitle}>Registered Office</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.cardContent}
-              onPress={() => openMap("54 Vaithyanathapuram, Thathaneri, Madurai")}
-            >
-              <MaterialIcons name="location-city" size={scale(20)} color={colors.primaryGold1} />
-              <Text style={styles.cardText}>
-                No. 54, Vaithyanathapuram, Thathaneri,{"\n"}Madurai - 625018
-              </Text>
+              <View style={styles.addressContainer}>
+                <Text style={styles.contactText}>
+                  M/s. BMG Jewellers Pvt Ltd
+                </Text>
+                <Text style={styles.contactText}>
+                  160, Melamasi St, Madurai-625001
+                </Text>
+              </View>
+              <Icon name='place' size={20} color={colors1.primary} />
             </TouchableOpacity>
           </LinearGradient>
         </View>
 
-        {/* Social Media */}
-        <View style={styles.socialContainer}>
-          <Text style={styles.socialTitle}>Connect With Us</Text>
-          <View style={styles.socialRow}>
-            {[
-              { name: 'facebook', color: '#3b5998', iconColor: '#ffffff', url: 'https://www.facebook.com/Jaigurujewellersmadurai' },
-              { name: 'instagram', color: '#e1306c', iconColor: '#ffffff', url: 'https://www.instagram.com/Jaigurujewellers_madurai/' },
-              { name: 'whatsapp', color: '#25D366', iconColor: '#ffffff', url: 'https://wa.me/919123456789' },
-              { name: 'youtube', color: '#FF0000', iconColor: '#ffffff', url: 'https://www.youtube.com/@JaigurujewellersMadurai' },
-              { name: 'twitter', color: '#1DA1F2', iconColor: '#ffffff', url: 'https://x.com/Jaigurujewellers24' }
-            ].map((social, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[styles.socialIcon, { backgroundColor: social.color }]}
-                onPress={() => Linking.openURL(social.url)}
-              >
-                <FontAwesome name={social.name} size={scale(20)} color={social.iconColor} />
-              </TouchableOpacity>
-            ))}
+        {/* Support Hours */}
+        <View style={styles.hoursContainer}>
+          <Text style={styles.hoursTitle}>Customer Support Hours</Text>
+          <View style={styles.hoursRow}>
+            <Text style={styles.hoursDay}>Monday - Saturday</Text>
+            <Text style={styles.hoursTime}>10:00 AM - 6:00 PM</Text>
+          </View>
+          <View style={styles.hoursRow}>
+            <Text style={styles.hoursDay}>Sunday</Text>
+            <Text style={styles.hoursTime}>11:00 AM - 4:00 PM</Text>
+          </View>
+        </View>
+
+        {/* Quick Actions */}
+        <View style={styles.actionsContainer}>
+          <Text style={styles.actionsTitle}>Quick Actions</Text>
+          <View style={styles.actionsRow}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() =>
+                handleWhatsApp('Hello! I need help via Live Chat.')
+              }
+            >
+              <Icon name='chat' size={24} color={colors1.primary} />
+              <Text style={styles.actionText}>Live Chat</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => handleWhatsApp('I would like to see the FAQs.')}
+            >
+              <Icon name='help-outline' size={24} color={colors1.primary} />
+              <Text style={styles.actionText}>FAQs</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => handlePhoneCall('919514333601')}
+            >
+              <Icon name='description' size={24} color={colors1.primary} />
+              <Text style={styles.actionText}>Support</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-    </View>
-  );
-};
+    </SafeAreaView>
+  )
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-   backgroundColor: '#eaf7ff',
-  },
-  headerContainer: {
-    flexDirection: 'row',
+  container: { flex: 1 },
+  scrollContainer: { paddingBottom: verticalScale(20) },
+  header: {
+    padding: scale(20),
+    paddingTop: verticalScale(20),
+    paddingBottom: verticalScale(30),
+    borderBottomLeftRadius: scale(30),
+    borderBottomRightRadius: scale(30),
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: scale(20),
-    paddingVertical: verticalScale(15),
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0'
+    marginBottom: verticalScale(20),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8
   },
-  backButton: {
-    padding: scale(5)
+  title: {
+    fontSize: scale(24),
+    fontWeight: 'bold',
+    color: colors1.textPrimary,
+    marginBottom: verticalScale(5)
   },
-  headerTitle: {
-    fontSize: scale(20),
-    // fontWeight: 'bold',
-    color: colors.black,
-    fontFamily: 'TrajanPro-Bold'
+  subtitle: {
+    fontSize: scale(16),
+    color: colors1.textLight,
+    opacity: 0.9
   },
-  headerRight: {
-    width: scale(24)
-  },
-  scrollContainer: {
-    paddingBottom: verticalScale(30)
-  },
-  cardContainer: {
-    paddingHorizontal: scale(20),
-    marginTop: verticalScale(20)
+  cardsContainer: {
+    paddingHorizontal: scale(15),
+    marginBottom: verticalScale(20)
   },
   card: {
-    borderRadius: scale(12),
-    padding: scale(15),
+    borderRadius: scale(15),
+    padding: scale(20),
     marginBottom: verticalScale(15),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3
+    shadowRadius: 3.84,
+    elevation: 4
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: verticalScale(10),
+    marginBottom: verticalScale(15),
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'rgba(205, 134, 92, 0.2)',
     paddingBottom: verticalScale(10)
   },
-  cardTitle: {
-    fontSize: scale(16),
-    fontWeight: '600',
-    marginLeft: scale(10),
-    color: colors.black,
-    fontFamily: 'TrajanPro-Bold'
-  },
-  cardContent: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginTop: verticalScale(8)
-  },
-  cardText: {
-    fontSize: scale(12),
-    marginLeft: scale(10),
-    color: colors.textPrimary,
-    lineHeight: verticalScale(20),
-     fontFamily: 'TrajanPro-Normal'
-  },
-  linkText: {
-    color: colors.primary,
-    textDecorationLine: 'underline'
-  },
-  socialContainer: {
-    marginTop: verticalScale(20),
-    alignItems: 'center'
-  },
-  socialTitle: {
-    fontSize: scale(16),
-    fontWeight: '600',
-    marginBottom: verticalScale(15),
-    color: colors.black,
-    fontFamily: 'TrajanPro-Bold'
-  },
-  socialRow: {
-    flexDirection: 'row',
-    justifyContent: 'center'
-  },
-  socialIcon: {
-    width: scale(45),
-    height: scale(45),
-    borderRadius: scale(22.5),
+  iconContainer: {
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(20),
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: scale(10),
+    marginRight: scale(10)
+  },
+  phoneIconContainer: { backgroundColor: 'rgba(205, 134, 92, 0.1)' },
+  emailIconContainer: { backgroundColor: 'rgba(205, 134, 92, 0.1)' },
+  locationIconContainer: { backgroundColor: 'rgba(205, 134, 92, 0.1)' },
+  cardTitle: {
+    fontSize: scale(18),
+    fontWeight: 'bold',
+    color: colors1.primary
+  },
+  contactItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: verticalScale(12),
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(205, 134, 92, 0.1)'
+  },
+  contactText: {
+    fontSize: scale(16),
+    color: colors1.textPrimary,
+    flex: 1,
+    marginRight: scale(10)
+  },
+  addressContainer: { flex: 1 },
+  hoursContainer: {
+    backgroundColor: colors1.cardBackground,
+    borderRadius: scale(15),
+    padding: scale(20),
+    marginHorizontal: scale(15),
+    marginBottom: verticalScale(20),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 4
   },
-  cardHeader: {
+  hoursTitle: {
+    fontSize: scale(18),
+    fontWeight: 'bold',
+    color: colors1.primary,
+    marginBottom: verticalScale(15),
+    textAlign: 'center'
+  },
+  hoursRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: verticalScale(10),
+    justifyContent: 'space-between',
+    paddingVertical: verticalScale(8),
     borderBottomWidth: 1,
-    borderBottomColor: colors.primaryGoldLight,
-    paddingBottom: verticalScale(10)
+    borderBottomColor: 'rgba(205, 134, 92, 0.1)'
   },
-  linkText: {
-    color: colors.primaryGold1,
-    textDecorationLine: 'underline'
+  hoursDay: {
+    fontSize: scale(16),
+    color: colors1.textPrimary,
+    fontWeight: '500'
   },
-  socialIcon: {
-    width: scale(42),
-    height: scale(42),
-    borderRadius: scale(21),
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: scale(8),
-    shadowColor: colors.primaryGold1,
+  hoursTime: { fontSize: scale(16), color: colors1.primary, fontWeight: '600' },
+  actionsContainer: {
+    backgroundColor: colors1.cardBackground,
+    borderRadius: scale(15),
+    padding: scale(20),
+    marginHorizontal: scale(15),
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 4
+  },
+  actionsTitle: {
+    fontSize: scale(18),
+    fontWeight: 'bold',
+    color: colors1.primary,
+    marginBottom: verticalScale(15),
+    textAlign: 'center'
+  },
+  actionsRow: { flexDirection: 'row', justifyContent: 'space-around' },
+  actionButton: {
+    alignItems: 'center',
+    padding: scale(10),
+    backgroundColor: 'rgba(205, 134, 92, 0.1)',
+    borderRadius: scale(10),
+    width: width * 0.25
+  },
+  actionText: {
+    fontSize: scale(12),
+    color: colors1.primary,
+    marginTop: verticalScale(5),
+    textAlign: 'center'
   }
-});
+})
 
-export default HelpCenter;
+export default HelpCenterPage

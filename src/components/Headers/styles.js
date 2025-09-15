@@ -9,8 +9,8 @@ const { width, height } = Dimensions.get('window');
 export default {
   container: {
     width: width,
-    height: height * 0.07,
-    backgroundColor: colors.whiteColor,
+    height: height * 0.10,
+    // backgroundColor: colors.whiteColor,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -35,8 +35,8 @@ export default {
     position: 'absolute', // Makes the title independent of other elements
     left: '35%', // Centers the title horizontally
     transform: [{ translateX: -width * 0.15 }], // Adjust centering offset (based on width of left and right containers)
-    color: colors.fontMainColor, 
-     fontFamily:"TrajanPro-Bold",
+    color: colors.fontMainColor, // Optional: Customize text color
+    
   },
   titleContainer: {
     flexDirection: 'row',

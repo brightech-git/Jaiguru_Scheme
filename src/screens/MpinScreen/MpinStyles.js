@@ -1,162 +1,174 @@
-import { StyleSheet, Dimensions } from 'react-native';
-import { scale, verticalScale } from '../../utils/scaling';
-import { colors } from '../../utils/colors';
+import { StyleSheet, Dimensions, Platform } from 'react-native'
+import { scale, verticalScale } from '../../utils/scaling'
+import {
+  FontSize,
+  Color,
+  Padding,
+  Border
+} from '../../utils/Global_Styles'
+import { colors } from '../../utils/colors'
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window')
 
 export default StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  backgroundOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    // backgroundColor: 'rgba(0, 0, 0, 0.6)',
-  },
+  // ─── Base Styles ──────────────────────────────────────────────────
   container: {
     flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: scale(20),
-    // backgroundColor: colors.primaryDark, 
+    backgroundColor: colors.white
+  },
+  animatedBackground: {
+    position: 'absolute',
+    width: width * 2,
+    height,
+    backgroundColor: colors.white,
+    opacity: 0.3
   },
   keyboardContainer: {
-    flex: 1,
+    flex: 1
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    padding: scale(24),
+    justifyContent: 'center'
   },
+  progressBar: {
+    height: 3,
+    backgroundColor: '#f5f5f5',
+    width: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0
+  },
+  progressFill: {
+    height: 3,
+    backgroundColor: colors.primaryGold
+  },
+
+  // ─── Header Styles ────────────────────────────────────────────────
   header: {
     alignItems: 'center',
-    marginBottom: verticalScale(40),
+    marginBottom: verticalScale(40)
   },
   lockAnimation: {
     width: scale(100),
-    height: scale(100),
+    height: verticalScale(100),
+    marginBottom: verticalScale(20)
   },
   title: {
-    fontSize: scale(24),
-    fontWeight: 'bold',
+    fontSize: 24,
+    // fontWeight: 'bold',
     color: colors.black,
-    marginTop: verticalScale(20),
-    marginBottom: verticalScale(10),
+    marginBottom: verticalScale(8),
+    textAlign: 'center',
+    fontFamily: 'TrajanPro-Bold'
   },
   subtitle: {
-    fontSize: scale(16),
-    color: colors.darkGray,
-    marginTop: verticalScale(5),
+    fontSize: scale(15),
+    color: colors.gray,
     textAlign: 'center',
-    lineHeight: scale(22),
+    fontFamily: 'TrajanPro-Normal',
+    lineHeight: scale(20),
+    paddingHorizontal: scale(20),
+    marginTop: verticalScale(10)
   },
+
+  // ─── MPIN Input Styles ────────────────────────────────────────────
   mpinContainer: {
-    marginBottom: verticalScale(30),
-  },
-  mpinHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: verticalScale(15),
-    alignItems: 'center',
+    marginBottom: verticalScale(30)
   },
   mpinLabel: {
     fontSize: scale(16),
-    color: colors.darkGray,
-    fontWeight: '600',
-  },
-  toggleButton: {
-    paddingHorizontal: scale(10),
-    paddingVertical: scale(5),
-  },
-  toggleButtonText: {
-    fontSize: scale(14),
-    color: colors.accentBlue,
-    fontWeight: '500',
+    color: colors.black,
+    marginBottom: verticalScale(16),
+    textAlign: 'center',
+    fontFamily: 'TrajanPro-Bold'
   },
   mpinInputsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginHorizontal: scale(10),
+    justifyContent: 'center',
+    marginBottom: verticalScale(16)
   },
   mpinInput: {
     width: scale(60),
-    height: scale(60),
+    height: verticalScale(60),
     backgroundColor: colors.white,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    fontSize: scale(20),
+    // fontWeight: 'bold',
     color: colors.black,
-    marginHorizontal: scale(5),
-    borderRadius: scale(12),
-    fontSize: scale(24),
-    fontWeight: 'bold',
     textAlign: 'center',
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
+    marginHorizontal: scale(4),
+    borderRadius: Border.radiusMedium,
+    fontFamily: 'TrajanPro-Bold',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    borderRadius: Border.br_mini
   },
-  mpinInputFocused: {
-    borderColor: colors.accentBlue,
-    backgroundColor: colors.inputFocused,
+  leftRadius: {
+    borderTopLeftRadius: Border.radiusMedium,
+    borderBottomLeftRadius: Border.radiusMedium
   },
-  mpinInputFilled: {
-    borderColor: colors.accentGreen,
+  rightRadius: {
+    borderTopRightRadius: Border.radiusMedium,
+    borderBottomRightRadius: Border.radiusMedium
   },
-  dotContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: verticalScale(20),
-  },
-  dot: {
-    width: scale(12),
-    height: scale(12),
-    backgroundColor: colors.lightGray,
-    borderRadius: scale(6),
-    marginHorizontal: scale(6),
-  },
-  dotFilled: {
-    backgroundColor: colors.accentBlue,
-  },
-  cooldownText: {
-    marginTop: verticalScale(15),
-    color: colors.errorRed,
+  attemptsText: {
+    fontSize: FontSize.xs,
+    color: colors.red,
     textAlign: 'center',
-    fontSize: scale(14),
+    marginTop: verticalScale(8),
+    fontFamily: 'TrajanPro-Normal'
   },
+
+  // ─── Button Styles ────────────────────────────────────────────────
   buttonContainer: {
-    marginTop: verticalScale(30),
+    marginTop: verticalScale(20),
+    borderRadius: Border.br_mini
   },
   primaryButton: {
-    backgroundColor: colors.accentBlue,
+    backgroundColor: colors.ButtonColor,
     paddingVertical: verticalScale(16),
-    borderRadius: scale(12),
     alignItems: 'center',
-    marginBottom: verticalScale(15),
-    elevation: 3,
-    shadowColor: colors.accentBlueShadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    marginBottom: verticalScale(16),
+    borderWidth: 1.5,
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    borderRadius: Border.br_mini
   },
   primaryButtonActive: {
-    backgroundColor: colors.accentBlueDark,
+    backgroundColor: colors.ButtonColor,
+    borderColor: colors.primaryGold,
+    borderRadius: Border.br_mini
   },
   primaryButtonDisabled: {
-    backgroundColor: colors.disabledGray,
+    opacity: 0.6
   },
   primaryButtonText: {
-    fontSize: scale(18),
-    color: colors.white,
-    fontWeight: 'bold',
+    color: colors.black,
+    fontSize: FontSize.medium,
+    // fontWeight: 'bold',
+    fontFamily: 'TrajanPro-Bold',
+    borderRadius: Border.radiusLarge
   },
   secondaryButton: {
-    alignItems: 'center',
-    paddingVertical: verticalScale(12),
+    padding: scale(16),
+    alignItems: 'center'
   },
   secondaryButtonText: {
-    fontSize: scale(16),
-    color: colors.accentBlue,
+    color: colors.errorColor,
+    fontSize: FontSize.small,
     fontWeight: '500',
-  },
-  footerText: {
-    color: colors.lightGray,
-    textAlign: 'center',
-    marginTop: verticalScale(20),
-    fontSize: scale(12),
-  },
+    fontFamily: 'TrajanPro-Normal',
+    borderRadius: Border.radiusLarge
+  }
+
+  // Uncomment if needed
+  // loadingAnimation: {
+  //   width: scale(60),
+  //   height: scale(60)
+  // }
 });
