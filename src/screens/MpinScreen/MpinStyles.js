@@ -1,174 +1,194 @@
-import { StyleSheet, Dimensions, Platform } from 'react-native'
-import { scale, verticalScale } from '../../utils/scaling'
-import {
-  FontSize,
-  Color,
-  Padding,
-  Border
-} from '../../utils/Global_Styles'
-import { colors } from '../../utils/colors'
+import { StyleSheet, Platform } from 'react-native';
+import appTheme from '../../utils/Theme';
 
-const { width, height } = Dimensions.get('window')
+const { COLORS, SIZES, FONTS } = appTheme;
 
 export default StyleSheet.create({
-  // ─── Base Styles ──────────────────────────────────────────────────
-  container: {
+  backgroundImage: {
     flex: 1,
-    backgroundColor: colors.white
-  },
-  animatedBackground: {
-    position: 'absolute',
-    width: width * 2,
-    height,
-    backgroundColor: colors.white,
-    opacity: 0.3
+    resizeMode: 'cover',
   },
   keyboardContainer: {
-    flex: 1
-  },
-  content: {
     flex: 1,
-    padding: scale(24),
-    justifyContent: 'center'
+    backgroundColor: COLORS.background,
   },
-  progressBar: {
-    height: 3,
-    backgroundColor: '#f5f5f5',
-    width: '100%',
-    position: 'absolute',
-    top: 0,
-    left: 0
-  },
-  progressFill: {
-    height: 3,
-    backgroundColor: colors.primaryGold
-  },
-
-  // ─── Header Styles ────────────────────────────────────────────────
-  header: {
+  container: {
+    flex: 1,
     alignItems: 'center',
-    marginBottom: verticalScale(40)
+    marginTop: SIZES.margin * 2,
   },
-  lockAnimation: {
-    width: scale(100),
-    height: verticalScale(100),
-    marginBottom: verticalScale(20)
+  logoContainer: {
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? SIZES.padding * 2.5 : SIZES.padding,
+    paddingBottom: SIZES.padding,
+  },
+  logoCard: {
+    backgroundColor: COLORS.card,
+    paddingHorizontal: SIZES.padding,
+    paddingVertical: SIZES.padding * 0.75,
+    borderRadius: SIZES.radius_lg,
+    alignItems: 'center',
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: SIZES.base },
+    shadowOpacity: 0.1,
+    shadowRadius: SIZES.radius_sm,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: COLORS.borderColor,
+  },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SIZES.margin / 2,
+  },
+  logoImage: {
+    width: SIZES.width * 0.18,
+    height: SIZES.height * 0.07,
+    marginRight: SIZES.base,
+    borderRadius: SIZES.radius_sm,
+  },
+  logoText: {
+    ...FONTS.body,
+    color: COLORS.title,
+    letterSpacing: 0.8,
+    fontSize: SIZES.h1,
+  },
+  subtitleText: {
+    ...FONTS.subheading,
+    color: COLORS.textLight,
+    letterSpacing: 1.5,
+    opacity: 0.8,
+  },
+  contentContainer: {
+    paddingHorizontal: SIZES.padding,
+    paddingTop: SIZES.padding * 0.5,
+    alignItems: 'center',
+  },
+  headerSection: {
+    alignItems: 'center',
+    marginBottom: SIZES.margin * 2,
+    marginTop: SIZES.margin * 2,
   },
   title: {
-    fontSize: 24,
-    // fontWeight: 'bold',
-    color: colors.black,
-    marginBottom: verticalScale(8),
+    ...FONTS.h1,
+    color: COLORS.title,
+    marginBottom: SIZES.base,
     textAlign: 'center',
-    fontFamily: 'TrajanPro-Bold'
   },
-  subtitle: {
-    fontSize: scale(15),
-    color: colors.gray,
+  description: {
+    ...FONTS.subheading,
+    color: COLORS.textLight,
     textAlign: 'center',
-    fontFamily: 'TrajanPro-Normal',
-    lineHeight: scale(20),
-    paddingHorizontal: scale(20),
-    marginTop: verticalScale(10)
+    opacity: 0.8,
+    fontSize: SIZES.h5,
+    
   },
-
-  // ─── MPIN Input Styles ────────────────────────────────────────────
-  mpinContainer: {
-    marginBottom: verticalScale(30)
+  mpinSection: {
+    alignItems: 'center',
+    marginBottom: SIZES.margin,
   },
   mpinLabel: {
-    fontSize: scale(16),
-    color: colors.black,
-    marginBottom: verticalScale(16),
-    textAlign: 'center',
-    fontFamily: 'TrajanPro-Bold'
+    ...FONTS.subheading,
+    color: COLORS.text,
+    marginBottom: SIZES.margin,
+    alignSelf: 'flex-start',
+    marginLeft: SIZES.base,
+     fontSize: SIZES.h5,
   },
-  mpinInputsContainer: {
+  mpinContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: verticalScale(16)
+    alignItems: 'center',
+    marginBottom: SIZES.margin,
+     gap: 10,
+  },
+  mpinInputWrapper: {
+    marginHorizontal: SIZES.base,
+    position: 'relative',
   },
   mpinInput: {
-    width: scale(60),
-    height: verticalScale(60),
-    backgroundColor: colors.white,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    fontSize: scale(20),
-    // fontWeight: 'bold',
-    color: colors.black,
-    textAlign: 'center',
-    marginHorizontal: scale(4),
-    borderRadius: Border.radiusMedium,
-    fontFamily: 'TrajanPro-Bold',
-    shadowColor: '#000',
+    width: SIZES.width * 0.13,
+    height: SIZES.height * 0.08,
+    borderWidth: 2,
+    borderColor: COLORS.borderColor,
+    borderRadius: SIZES.radius_lg,
+    ...FONTS.h3,
+    backgroundColor: COLORS.input,
+    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
-    elevation: 3,
-    borderRadius: Border.br_mini
+    elevation: 2,
+    textAlign: 'center',
+    color: COLORS.text,
+   
   },
-  leftRadius: {
-    borderTopLeftRadius: Border.radiusMedium,
-    borderBottomLeftRadius: Border.radiusMedium
+  mpinInputFilled: {
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.card,
+    shadowColor: COLORS.primary,
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
+    
   },
-  rightRadius: {
-    borderTopRightRadius: Border.radiusMedium,
-    borderBottomRightRadius: Border.radiusMedium
+  filledIndicator: {
+    position: 'absolute',
+    bottom: -SIZES.base,
+    left: '50%',
+    marginLeft: -3,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.primary,
+    
   },
   attemptsText: {
-    fontSize: FontSize.xs,
-    color: colors.red,
-    textAlign: 'center',
-    marginTop: verticalScale(8),
-    fontFamily: 'TrajanPro-Normal'
+    ...FONTS.fontSm,
+    color: COLORS.danger,
+    marginTop: SIZES.base,
   },
-
-  // ─── Button Styles ────────────────────────────────────────────────
-  buttonContainer: {
-    marginTop: verticalScale(20),
-    borderRadius: Border.br_mini
-  },
-  primaryButton: {
-    backgroundColor: colors.ButtonColor,
-    paddingVertical: verticalScale(16),
+  actionSection: {
+    paddingBottom: Platform.OS === 'ios' ? SIZES.padding : SIZES.padding / 2,
     alignItems: 'center',
-    marginBottom: verticalScale(16),
-    borderWidth: 1.5,
-    borderColor: '#e0e0e0',
-    shadowColor: '#000',
-    borderRadius: Border.br_mini
   },
-  primaryButtonActive: {
-    backgroundColor: colors.ButtonColor,
-    borderColor: colors.primaryGold,
-    borderRadius: Border.br_mini
+  forgotButton: {
+    paddingVertical: SIZES.padding / 2,
+    marginBottom: SIZES.margin / 2,
   },
-  primaryButtonDisabled: {
-    opacity: 0.6
+  forgotText: {
+    ...FONTS.subheading,
+    color: COLORS.primary,
+    fontSize: SIZES.h6,
   },
-  primaryButtonText: {
-    color: colors.black,
-    fontSize: FontSize.medium,
-    // fontWeight: 'bold',
-    fontFamily: 'TrajanPro-Bold',
-    borderRadius: Border.radiusLarge
+  createButton: {
+    backgroundColor: COLORS.borderColor,
+    paddingVertical: SIZES.padding,
+    borderRadius: SIZES.radius_lg,
+    alignItems: 'center',
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+    width: SIZES.width * 0.75,
   },
-  secondaryButton: {
-    padding: scale(16),
-    alignItems: 'center'
+  createButtonActive: {
+    backgroundColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  secondaryButtonText: {
-    color: colors.errorColor,
-    fontSize: FontSize.small,
-    fontWeight: '500',
-    fontFamily: 'TrajanPro-Normal',
-    borderRadius: Border.radiusLarge
-  }
-
-  // Uncomment if needed
-  // loadingAnimation: {
-  //   width: scale(60),
-  //   height: scale(60)
-  // }
+  createButtonLoading: {
+    opacity: 0.7,
+  },
+  createButtonText: {
+    ...FONTS.body,
+    color: COLORS.textLight,
+    fontSize: SIZES.h4,
+  },
+  createButtonTextActive: {
+    color: COLORS.white,
+  },
 });

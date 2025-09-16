@@ -1,148 +1,173 @@
-// OTPStyles.js
-import { StyleSheet } from 'react-native';
-import { scale, verticalScale } from '../../utils/scaling';
-import { colors } from '../../utils/colors';
+import { StyleSheet } from "react-native";
+import appTheme from "../../utils/Theme";
 
-export const styles = StyleSheet.create({
-  container: {
+const { COLORS, SIZES, FONTS } = appTheme;
+
+export default StyleSheet.create({
+  backgroundImage: {
     flex: 1,
-    alignItems: 'center',
-    padding: scale(20),
-    backgroundColor: '#F9F9F9',
+    resizeMode: "cover",
   },
-  welcomeText: {
-    fontSize: scale(18),
-    fontWeight: '500',
-    color: colors.gray,
-    textAlign: 'center',
-    marginTop: verticalScale(20),
-    marginBottom: verticalScale(10),
-     fontFamily: 'TrajanPro-Bold',
+  gradientOverlay: {
+    flex: 1,
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  resendDisabled: {
+    opacity: 0.5,
+  },
+  container: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: SIZES.padding,
+  },
+  logoContainer: {
+    marginBottom: SIZES.margin * 2,
+    alignItems: "center",
   },
   logoImage: {
-    width: scale(180),
-    height: scale(180),
-    resizeMode: 'contain',
-    marginBottom: verticalScale(10),
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
   },
+  card: {
+    width: "100%",
+    maxWidth: SIZES.container / 2,
+    borderRadius: SIZES.radius_lg + 8,
+    padding: SIZES.padding * 2,
+    backgroundColor: COLORS.surface,
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+
+  // Typography
   title: {
-    fontSize: scale(22),
-    // fontWeight: '700',
-    color: colors.black,
-    marginBottom: verticalScale(18),
-     fontFamily: 'TrajanPro-Bold',
+    ...FONTS.h1,
+    textAlign: "center",
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: scale(14),
-    color: colors.gray,
-    marginBottom: verticalScale(20),
-     fontFamily: 'TrajanPro-Bold',
+    ...FONTS.body,
+    color: COLORS.textLight,
+    textAlign: "center",
+    marginBottom: SIZES.margin * 2,
+     fontSize: SIZES.h1,
   },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    borderWidth: 1,
-    borderColor: colors.lightGray,
-    borderRadius: scale(10),
-    paddingHorizontal: scale(10),
-    backgroundColor: colors.white,
-    marginBottom: verticalScale(10),
+  label: {
+    ...FONTS.subheading,
+    fontSize: SIZES.fontLg,
+    color: COLORS.text,
+    marginBottom: 8,
+    marginLeft: 4,
   },
-  inputError: {
-    borderColor: colors.red,
+  otpSubtitle: {
+    ...FONTS.h3,
+    fontFamily: FONTS.h2.fontFamily,
+    color: COLORS.textLight,
+    marginBottom: SIZES.margin,
+    textAlign: "center",
+     fontSize: SIZES.fontLg,
+    
   },
   errorText: {
-    color: colors.red,
-    fontSize: scale(12),
-    alignSelf: 'flex-start',
-    marginBottom: verticalScale(10),
-     fontFamily: 'TrajanPro-Bold',
+    ...FONTS.fontXs,
+    color: COLORS.danger,
+    marginTop: 4,
+    marginLeft: 4,
+    marginBottom: 10,
+    textAlign: "center",
   },
-  prefix: {
-    fontSize: scale(16),
-    color: colors.black,
-    marginRight: scale(10),
-     fontFamily: 'TrajanPro-Bold',
-  },
-  input: {
-    flex: 1,
-    height: scale(45),
-    fontSize: scale(16),
-    color: colors.black,
-     fontFamily: 'TrajanPro-Bold',
-  },
-  continueButton: {
-    width: '100%',
-    height: scale(45),
-    borderRadius: scale(10),
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: verticalScale(10),
-    marginBottom: verticalScale(30),
-     backgroundColor: colors.ButtonColor,
 
+  // Inputs
+  inputContainer: {
+    marginBottom: SIZES.margin,
   },
-  continueText: {
-    color: colors.white,
-    fontSize: scale(16),
-    // fontWeight: 'bold',
-     fontFamily: 'TrajanPro-Bold',
+  phoneInputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.input,
+    borderRadius: SIZES.radius_lg,
+    borderWidth: 2,
+    borderColor: COLORS.borderColor,
+    paddingHorizontal: SIZES.padding,
+    height: 60,
   },
-  otpLabel: {
-    fontSize: scale(16),
-    // fontWeight: '500',
-    marginBottom: verticalScale(10),
-    color: colors.black,
-     fontFamily: 'TrajanPro-Bold',
+  countryCode: {
+    ...FONTS.subheading,
+    fontSize: SIZES.fontLg,
+    color: COLORS.text,
+    marginRight: 8,
   },
+  phoneInput: {
+    flex: 1,
+    ...FONTS.fontLg,
+    color: COLORS.text,
+    height: "100%",
+  },
+  inputError: {
+    borderColor: COLORS.danger,
+  },
+
+  // OTP
   otpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
-    marginBottom: verticalScale(20),
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: SIZES.margin * 2,
+    gap: SIZES.radius,
+  },
+  otpInputWrapper: {
+    flex: 1,
+    borderRadius: SIZES.radius_lg,
+    borderWidth: 2,
+    borderColor: COLORS.borderColor,
+    height: 70,
+    justifyContent: "center",
+    alignItems: "center",
   },
   otpInput: {
-    width: scale(45),
-    height: scale(50),
-    borderWidth: 1,
-    borderColor: colors.lightGray,
-    borderRadius: scale(8),
-    textAlign: 'center',
-    fontSize: scale(18),
-    backgroundColor: colors.white,
+    width: "100%",
+    height: "100%",
+    ...FONTS.h3,
+    textAlign: "center",
+    color: COLORS.text,
   },
-  otpFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    width: '80%',
-    marginBottom: verticalScale(20),
-   
+
+  // Buttons
+  primaryButton: {
+    borderRadius: SIZES.radius_lg,
+    overflow: "hidden",
+    marginBottom: SIZES.margin,
+    height: 60,
+  },
+  buttonGradient: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  primaryButtonText: {
+    ...FONTS.body,
+    color: COLORS.white,
+    fontSize: SIZES.h4,
+  },
+
+  // Resend
+  resendContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   resendText: {
-    color: colors.errorColor,
-    fontSize: scale(14),
-    // fontWeight: '600',
-    textDecorationLine: 'underline',
-     fontFamily: 'TrajanPro-Bold',
+    ...FONTS.font,
+    color: COLORS.textLight,
   },
-  timerText: {
-    color: colors.gray,
-    fontSize: scale(14),
-    // fontWeight: '500',
-     fontFamily: 'TrajanPro-Bold',
-  },
-  signupWrapper: {
-    marginTop: verticalScale(10),
-  },
-  signupText: {
-    color: colors.gray,
-    fontSize: scale(14),
-     fontFamily: 'TrajanPro-Bold',
-  },
-  signupLink: {
-    color:"red",
-    // fontWeight: '600',
-     fontFamily: 'TrajanPro-Bold',
+  resendLink: {
+    ...FONTS.subheading,
+    fontSize: SIZES.font,
+    color: COLORS.primary,
   },
 });

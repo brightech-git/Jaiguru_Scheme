@@ -1,17 +1,12 @@
-import { Dimensions, StyleSheet } from 'react-native'
-import {
-  alignment,
-  colors,
-  scale,
-  verticalScale
-} from '../../utils'
-import { colors1 } from '../../utils/colors'
+import { StyleSheet, Dimensions } from 'react-native';
+import appTheme from '../../utils/Theme';
 
-const { height, width } = Dimensions.get('window')
+const { COLORS, SIZES, FONTS } = appTheme;
+const { height, width } = Dimensions.get('window');
 
-const styles = StyleSheet.create({
+export default StyleSheet.create({
   flex: {
-    flex: 1
+    flex: 1,
   },
   safeAreaStyle: {
     backgroundColor: 'transparent',
@@ -28,134 +23,120 @@ const styles = StyleSheet.create({
   backgroundImageStyle: {
     opacity: 0.9,
   },
-  
-  // Enhanced Header Styles with modern colors1 theme
   headerContainer1: {
-    backgroundColor: colors1.headerBackground, // Using your primary color
-    paddingBottom: verticalScale(25),
-    borderBottomLeftRadius: scale(25),
-    borderBottomRightRadius: scale(25),
+    backgroundColor: COLORS.primary,
+    paddingBottom: SIZES.padding * 1.5,
+    borderBottomLeftRadius: SIZES.radius_lg,
+    borderBottomRightRadius: SIZES.radius_lg,
     elevation: 8,
-    shadowColor: colors1.primaryDark,
+    shadowColor: COLORS.dark,
     shadowOffset: {
       width: 0,
       height: 4,
     },
     shadowOpacity: 0.3,
     shadowRadius: 6,
-    // Add gradient effect simulation with overlay
     position: 'relative',
   },
-
-  // Top section with FAQ and Menu icons
   topHeaderSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: scale(15),
-    paddingTop: verticalScale(10),
-    paddingBottom: verticalScale(5),
+    paddingHorizontal: SIZES.padding,
+    paddingTop: SIZES.padding / 1.5,
+    paddingBottom: SIZES.padding / 2,
   },
-
   faqIconContainer: {
-    backgroundColor: colors1.accent, // Modern accent color
-    borderRadius: scale(25),
-    padding: scale(10),
+    backgroundColor: COLORS.secondary,
+    borderRadius: SIZES.radius_lg,
+    padding: SIZES.padding / 1.5,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
-    shadowColor: colors1.primaryDark,
+    shadowColor: COLORS.dark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
-
   menuIconContainer: {
-    backgroundColor: colors1.accent, // Modern accent color
-    borderRadius: scale(25),
-    padding: scale(10),
+    backgroundColor: COLORS.secondary,
+    borderRadius: SIZES.radius_lg,
+    padding: SIZES.padding / 1.5,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
-    shadowColor: colors1.primaryDark,
+    shadowColor: COLORS.dark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
-
-  // Main header section with logo and company name
   mainHeaderSection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: scale(20),
-    paddingVertical: verticalScale(10),
-    marginTop: verticalScale(-20),
+    paddingHorizontal: SIZES.padding,
+    paddingVertical: SIZES.padding / 1.5,
+    marginTop: -SIZES.margin,
   },
-
   logoContainer: {
-    marginRight: scale(15),
-    backgroundColor: 'rgba(255, 255, 255, 0.53)',
-    borderRadius: scale(30),
-    padding: scale(1),
+    marginRight: SIZES.margin,
+    backgroundColor: COLORS.primaryLight,
+    borderRadius: SIZES.radius_lg,
+    padding: 1,
   },
-
   headerLogo: {
-    width: scale(60),
-    height: scale(60),
+    width: SIZES.h2 * 4,
+    height: SIZES.h2 * 4,
   },
-
   companyNameContainer: {
     alignItems: 'center',
   },
-
   companyName: {
-    fontSize: scale(18),
-    fontWeight: 'bold',
-    color: colors1.primaryText,
+    fontSize: SIZES.h5,
+    fontFamily: FONTS.h5.fontFamily,
+    lineHeight: FONTS.h5.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
+    color: COLORS.title,
     letterSpacing: 1,
   },
-
   companySubtitle: {
-    fontSize: scale(14),
-   color: colors1.primaryText,
-    fontWeight: '600',
-    marginTop: verticalScale(2),
+    fontSize: SIZES.font,
+    fontFamily: FONTS.font.fontFamily,
+    lineHeight: FONTS.font.lineHeight,
+    fontWeight: FONTS.subheading.fontWeight,
+    color: COLORS.title,
+    marginTop: SIZES.margin / 4,
   },
-
-  // Rate timestamp
   rateTimestampContainer: {
     alignItems: 'center',
-    paddingHorizontal: scale(20),
-    marginTop: verticalScale(5),
+    paddingHorizontal: SIZES.padding,
+    marginTop: SIZES.margin / 2,
   },
-
   rateTimestamp: {
-    fontSize: scale(12),
-    color: colors1.textPrimary, // White text
-    fontWeight: '500',
+    fontSize: SIZES.fontSm,
+    fontFamily: FONTS.fontSm.fontFamily,
+    lineHeight: FONTS.fontSm.lineHeight,
+    color: COLORS.title,
+    fontWeight: FONTS.subheading.fontWeight,
     opacity: 0.85,
-    textShadowColor: colors1.primaryDark,
+    textShadowColor: COLORS.dark,
     textShadowOffset: { width: 0.5, height: 0.5 },
     textShadowRadius: 1,
   },
-
-  // Rate cards container
   rateCardsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: scale(15),
-    marginTop: verticalScale(15),
+    paddingHorizontal: SIZES.padding,
+    marginTop: SIZES.margin,
   },
-
   rateCard: {
     flex: 1,
-    backgroundColor: colors1.cardBackground, // Clean white background
-    borderRadius: scale(16),
-    marginHorizontal: scale(6),
-    padding: scale(15),
+    backgroundColor: COLORS.card,
+    borderRadius: SIZES.radius_lg,
+    marginHorizontal: SIZES.margin / 2,
+    padding: SIZES.padding,
     elevation: 6,
-    shadowColor: colors1.primaryDark,
+    shadowColor: COLORS.dark,
     shadowOffset: {
       width: 0,
       height: 3,
@@ -163,120 +144,116 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.27,
     shadowRadius: 4.65,
     borderWidth: 1,
-    borderColor: colors1.borderLight, // Subtle border
+    borderColor: COLORS.borderColor,
   },
-
   rateCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-
   rateIconContainer: {
-    marginRight: scale(10),
+    marginRight: SIZES.margin / 1.5,
   },
-
   animatedCoinContainer: {
-    height: scale(35),
-    width: scale(35),
+    height: SIZES.h4 * 1.5,
+    width: SIZES.h4 * 1.5,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 215, 0, 0.2)',
-    borderRadius: scale(17.5),
+    backgroundColor: COLORS.primaryLight,
+    borderRadius: SIZES.radius,
     overflow: 'hidden',
-    transform: [{ perspective: 1000 }]
+    transform: [{ perspective: 1000 }],
   },
-
   rateCoinIcon: {
-    width: scale(25),
-    height: scale(25),
-    resizeMode: 'contain'
+    width: SIZES.h4,
+    height: SIZES.h4,
+    resizeMode: 'contain',
   },
-
   rateTextContainer: {
     flex: 1,
   },
-
   rateLabel: {
-    fontSize: scale(12),
-    color: '#666',
-    fontWeight: '600',
-    marginBottom: verticalScale(2),
+    fontSize: SIZES.fontSm,
+    fontFamily: FONTS.fontSm.fontFamily,
+    lineHeight: FONTS.fontSm.lineHeight,
+    color: COLORS.textLight,
+    fontWeight: FONTS.subheading.fontWeight,
+    marginBottom: SIZES.margin / 4,
   },
-
   rateValue: {
-    fontSize: scale(16),
-    color: '#2E7D32',
-    fontWeight: 'bold',
-    marginBottom: verticalScale(1),
+    fontSize: SIZES.fontLg,
+    fontFamily: FONTS.fontLg.fontFamily,
+    lineHeight: FONTS.fontLg.lineHeight,
+    color: COLORS.success,
+    fontWeight: FONTS.heading.fontWeight,
+    marginBottom: SIZES.margin / 8,
   },
-
   rateUnit: {
-    fontSize: scale(10),
-    color: '#888',
-    fontWeight: '500',
+    fontSize: SIZES.fontXs,
+    fontFamily: FONTS.fontXs.fontFamily,
+    lineHeight: FONTS.fontXs.lineHeight,
+    color: COLORS.textLight,
+    fontWeight: FONTS.subheading.fontWeight,
   },
-
-  // Section headers
   sectionHeaderContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: verticalScale(10),
+    marginBottom: SIZES.margin / 1.5,
   },
-
   titletext: {
-    fontSize: scale(16),
-    fontWeight: 'bold',
-    color: colors1.primaryText,
+    fontSize: SIZES.fontLg,
+    fontFamily: FONTS.fontLg.fontFamily,
+    lineHeight: FONTS.fontLg.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
+    color: COLORS.title,
     letterSpacing: 1,
   },
-
   viewAllText: {
     textAlign: 'right',
-    marginRight: scale(20),
-    fontSize: scale(16),
-    fontWeight: 'bold',
-    color: colors1.primaryText,
+    marginRight: SIZES.margin,
+    fontSize: SIZES.fontLg,
+    fontFamily: FONTS.fontLg.fontFamily,
+    lineHeight: FONTS.fontLg.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
+    color: COLORS.title,
     letterSpacing: 1,
   },
-
-  // Rest of the existing styles (keeping them as they were)
   leftIconPadding: {
-    ...alignment.PLsmall,
-    ...alignment.PRlarge
+    paddingLeft: SIZES.padding / 2,
+    paddingRight: SIZES.padding * 1.5,
   },
   scrollViewStyle: {
-    marginTop: verticalScale(20),
-    backgroundColor: colors.themeBackground
+    marginTop: SIZES.margin,
+    backgroundColor: COLORS.background,
   },
   grayBackground: {
-    backgroundColor: colors.white
+    backgroundColor: COLORS.white,
   },
   caroselContainer: {
     width: '100%',
     height: height * 0.3,
     position: 'relative',
     padding: 10,
-    borderRadius: scale(70),
+    borderRadius: SIZES.radius_lg * 2,
     overflow: 'hidden',
-    marginTop: verticalScale(15),
-    marginBottom: verticalScale(-16),
+    marginTop: SIZES.margin,
+    marginBottom: -SIZES.margin,
     alignItems: 'center',
   },
   caroselStyle: {
     width,
     height: height * 0.3,
-    borderRadius: scale(70),
+    borderRadius: SIZES.radius_lg * 2,
   },
   headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: scale(15),
-    paddingVertical: verticalScale(10),
+    paddingHorizontal: SIZES.padding,
+    paddingVertical: SIZES.padding / 1.5,
   },
   headercontainer1: {
-    backgroundColor: colors1.headerBackground,
+    backgroundColor: COLORS.primary,
   },
   locationWrapper: {
     alignItems: 'flex-start',
@@ -290,38 +267,42 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   locationText: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#00000',
-    marginLeft: scale(5),
-    marginRight: scale(5),
+    fontSize: SIZES.h5,
+    fontFamily: FONTS.h5.fontFamily,
+    lineHeight: FONTS.h5.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
+    color: COLORS.title,
+    marginLeft: SIZES.margin / 2,
+    marginRight: SIZES.margin / 2,
   },
   notificationIcon: {
-    marginLeft: scale(5),
-    padding: scale(10)
+    marginLeft: SIZES.margin / 2,
+    padding: SIZES.padding / 1.5,
   },
   locationLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#808080',
-    marginBottom: verticalScale(5),
-    padding: scale(7)
+    fontSize: SIZES.fontLg,
+    fontFamily: FONTS.fontLg.fontFamily,
+    lineHeight: FONTS.fontLg.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
+    color: COLORS.textLight,
+    marginBottom: SIZES.margin / 2,
+    padding: SIZES.padding / 2,
   },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginTop: scale(15),
-    marginLeft: scale(0)
+    marginTop: SIZES.margin,
+    marginLeft: 0,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: scale(10),
-    marginHorizontal: scale(20),
-    marginTop: verticalScale(10),
-    padding: scale(13),
-    shadowColor: '#808080',
+    backgroundColor: COLORS.white,
+    borderRadius: SIZES.radius,
+    marginHorizontal: SIZES.margin,
+    marginTop: SIZES.margin / 1.5,
+    padding: SIZES.padding,
+    shadowColor: COLORS.dark,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -332,42 +313,46 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    marginLeft: scale(10),
-    color: '#000',
-    fontSize: 18,
+    marginLeft: SIZES.margin / 1.5,
+    color: COLORS.text,
+    fontSize: SIZES.h5,
+    fontFamily: FONTS.h5.fontFamily,
+    lineHeight: FONTS.h5.lineHeight,
   },
   menuDrawerContainer: {
     position: 'absolute',
     top: '10%',
-    left: '2%'
+    left: '2%',
   },
   imgResponsive: {
     flex: 1,
     width: undefined,
-    height: undefined
+    height: undefined,
   },
   headingText: {
-    fontSize: scale(16)
+    fontSize: SIZES.fontLg,
+    fontFamily: FONTS.fontLg.fontFamily,
+    lineHeight: FONTS.fontLg.lineHeight,
   },
   itemCardContainer: {
-    width: scale(290),
-    height: scale(220),
-    ...alignment.MTsmall,
-    ...alignment.MRlarge
+    width: SIZES.container / 2.5,
+    height: SIZES.h1 * 5,
+    marginTop: SIZES.margin / 2,
+    marginRight: SIZES.margin * 1.5,
   },
   productgoldContainer: {
-    paddingLeft: scale(10),
+    paddingLeft: SIZES.padding / 1.5,
   },
   iconContainer: {
-    width: scale(60),
-    height: verticalScale(60),
-    marginRight: scale(27),
+    width: SIZES.h2 * 2,
+    height: SIZES.h2 * 2,
+    marginRight: SIZES.margin * 1.5,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: scale(40),
+    borderRadius: SIZES.radius_lg,
     overflow: 'hidden',
-    backgroundColor: '#E0F8FF',
-    marginTop: scale(16)
+    backgroundColor: COLORS.primaryLight,
+    marginTop: SIZES.margin,
   },
   iconImage: {
     width: '100%',
@@ -377,93 +362,101 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   categoryContainer: {
-    marginTop: verticalScale(10),
-    paddingHorizontal: scale(10),
+    marginTop: SIZES.margin / 1.5,
+    paddingHorizontal: SIZES.padding / 1.5,
   },
   titleSpacer: {
     marginLeft: '5%',
-    marginTop: scale(10)
+    marginTop: SIZES.margin / 1.5,
   },
   productCard: {
     marginLeft: '5%',
     width: '43%',
-    height: scale(200),
-    marginTop: scale(10),
-    marginBottom: scale(20),
-    borderColor: colors.whiteColor,
-    borderWidth: scale(8),
+    height: SIZES.h1 * 5,
+    marginTop: SIZES.margin / 1.5,
+    marginBottom: SIZES.margin,
+    borderColor: COLORS.white,
+    borderWidth: SIZES.radius,
   },
   productScrollContainer: {
-    marginTop: verticalScale(10),
+    marginTop: SIZES.margin / 1.5,
   },
   seeAllTextContainer: {
     flex: 1,
     alignItems: 'flex-end',
-    marginTop: 15
+    marginTop: SIZES.margin,
   },
   locationImage: {
-    width: 84,
-    height: 54,
-    marginRight: 8,
+    width: SIZES.h2 * 2,
+    height: SIZES.h3 * 2,
+    marginRight: SIZES.margin / 2,
   },
   seeAllText: {
     textAlign: 'right',
     marginRight: '6%',
-    marginTop: scale(-35),
+    marginTop: -SIZES.h3,
   },
   spacer: {
-    ...alignment.MBsmall
+    marginBottom: SIZES.margin / 2,
   },
   categoryWrapper: {
     alignItems: 'center',
-    marginRight: scale(17),
+    marginRight: SIZES.margin,
     padding: 0,
-    marginLeft: scale(-6),
+    marginLeft: -SIZES.margin / 2,
   },
   container: {
     padding: 5,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors1.primaryText,
-    marginLeft: 10
+    fontSize: SIZES.h5,
+    fontFamily: FONTS.h5.fontFamily,
+    lineHeight: FONTS.h5.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
+    color: COLORS.title,
+    marginLeft: SIZES.margin / 1.5,
   },
   titlecard: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.greenColor,
+    fontSize: SIZES.h5,
+    fontFamily: FONTS.h5.fontFamily,
+    lineHeight: FONTS.h5.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
+    color: COLORS.success,
     marginLeft: '5%',
   },
   trendingContainer: {
     flexDirection: 'row',
-    marginTop: 10,
+    marginTop: SIZES.margin / 1.5,
   },
   card: {
     flex: 1,
-    backgroundColor: colors.containerDark,
-    borderRadius: 10,
-    padding: 20,
-    margin: 10,
+    backgroundColor: COLORS.card,
+    borderRadius: SIZES.radius,
+    padding: SIZES.padding,
+    margin: SIZES.margin / 1.5,
     flexDirection: 'row',
     alignItems: 'center',
   },
   subtitle: {
-    color: colors.greenColor,
-    fontSize: 16,
+    color: COLORS.success,
+    fontSize: SIZES.fontLg,
+    fontFamily: FONTS.fontLg.fontFamily,
+    lineHeight: FONTS.fontLg.lineHeight,
     marginLeft: '5%',
   },
   subtitle1: {
-    color: colors.greenColor,
-    fontSize: 11,
+    color: COLORS.success,
+    fontSize: SIZES.fontXs,
+    fontFamily: FONTS.fontXs.fontFamily,
+    lineHeight: FONTS.fontXs.lineHeight,
     marginLeft: '5%',
   },
   logo: {
-    width: 30,
-    height: 30,
-    marginBottom: 10,
-    marginRight: 10,
-    resizeMode: 'contain'
+    width: SIZES.h5,
+    height: SIZES.h5,
+    marginBottom: SIZES.margin / 1.5,
+    marginRight: SIZES.margin / 1.5,
+    resizeMode: 'contain',
   },
   backgroundImage: {
     flex: 1,
@@ -471,58 +464,60 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rateUpdatedText: {
-    fontSize: 16,
-    color: colors1.textPrimary,
-    marginTop: 8,
+    fontSize: SIZES.fontLg,
+    fontFamily: FONTS.fontLg.fontFamily,
+    lineHeight: FONTS.fontLg.lineHeight,
+    color: COLORS.title,
+    marginTop: SIZES.margin / 2,
     textAlign: 'center',
-    fontWeight: 'bold'
+    fontWeight: FONTS.heading.fontWeight,
   },
   contentWrapper: {
-    marginHorizontal: scale(20),
-    marginTop: verticalScale(15),
-    paddingVertical: verticalScale(18),
-    paddingHorizontal: scale(18),
-    backgroundColor: colors1.sectionBackground, // Modern section background
-    borderRadius: scale(15),
+    marginHorizontal: SIZES.margin,
+    marginTop: SIZES.margin,
+    paddingVertical: SIZES.padding,
+    paddingHorizontal: SIZES.padding,
+    backgroundColor: COLORS.surfaceVariant,
+    borderRadius: SIZES.radius_lg,
     elevation: 4,
-    shadowColor: colors1.primaryDark,
+    shadowColor: COLORS.dark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 3.5,
     borderWidth: 1,
-    borderColor: colors1.borderLight,
+    borderColor: COLORS.borderColor,
   },
   contentText: {
-    color: colors1.primaryText, // Modern primary text color
-    fontSize: scale(16),
-    fontWeight: '700',
-    marginVertical: verticalScale(8),
+    color: COLORS.title,
+    fontSize: SIZES.fontLg,
+    fontFamily: FONTS.fontLg.fontFamily,
+    lineHeight: FONTS.fontLg.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
+    marginVertical: SIZES.margin / 2,
     textAlign: 'left',
     letterSpacing: 0.3,
   },
   contentText1: {
-    color: colors1.textSecondary, // Modern secondary text
-    fontSize: scale(13),
-    lineHeight: scale(20),
-    fontWeight: '500',
+    color: COLORS.textLight,
+    fontSize: SIZES.fontSm,
+    fontFamily: FONTS.fontSm.fontFamily,
+    lineHeight: SIZES.fontLg,
+    fontWeight: FONTS.subheading.fontWeight,
     opacity: 0.9,
   },
   animatedContainer: {
-    height: 40,
-    width: 40,
+    height: SIZES.h5,
+    width: SIZES.h5,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: SIZES.margin / 1.5,
     overflow: 'hidden',
-    transform: [{ perspective: 1000 }]
+    transform: [{ perspective: 1000 }],
   },
   youtubeContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: scale(-30),
+    marginTop: 20,
   },
-
-})
-
-export default styles
+});

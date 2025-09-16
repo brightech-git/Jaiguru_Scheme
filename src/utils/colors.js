@@ -58,55 +58,57 @@ export const colors = {
 // New Colors1 Theme with CD865C base
 export const colors1 = {
   // Base tones
-  primary: '#CD865C',          // Main brand/base color
-  primaryDark: '#B35F34',      // Darker shade for hover/pressed
-  primaryLight: '#E8B79D',     // Lighter shade for highlights
+  primary: '#C5A572',          // Main brand/base color (Elegant muted gold)
+  primaryDark: '#8C6C3F',      // Darker bronze shade
+  primaryLight: 'rgba(197,165,114,0.25)', // Lighter highlight
 
   // Text colors
-  textPrimary: '#000000ff',    // Main text
-  primaryText: '#041f60',      // Primary text color
-  textSecondary: '#555555',    // Secondary/subtitle text
+  textPrimary: '#2C2C2C',      // Main text
+  primaryText: '#1B1B1B',      // Primary title text
+  textSecondary: '#7C7C7C',    // Secondary/subtitle text
   textLight: '#FFFFFF',        // Light text on dark backgrounds
 
   // Backgrounds
-  background: '#FFF9F6',       // Page background (light warm)
-  cardBackground: '#FFFFFF',   // Card or container
-  sectionBackground: '#FBEFE9',// Section or block backgrounds
-  headerBackground: '#f58747b6', // Headers/Top bars
+  background: '#FFFFFF',       // Page background
+  cardBackground: '#F9F6F1',   // Card or container
+  sectionBackground: '#FAF5ED',// Section or block backgrounds
+  headerBackground: '#D4AF37', // Notification gold for headers
 
   // Buttons
-  buttonPrimary: '#CD865C',    
-  buttonPrimaryHover: '#B35F34',
+  buttonPrimary: '#C5A572',
+  buttonPrimaryHover: '#8C6C3F',
   buttonSecondary: '#FFFFFF',
   buttonText: '#FFFFFF',
 
   // Borders and lines
-  borderLight: '#E6D3CA',
-  borderDark: '#B35F34',
+  borderLight: '#E0D9CF',
+  borderDark: '#8C6C3F',
 
   // Alerts & Status
-  success: '#4CAF50',
-  error: '#F44336',
-  warning: '#FF9800',
-  info: '#2196F3',
+  success: '#2E7D32',
+  error: '#C62828',
+  warning: '#E6A93D',
+  info: '#2E6F95',
 
   // Icons
-  iconPrimary: '#CD865C',
-  iconSecondary: '#555555',
+  iconPrimary: '#C5A572',
+  iconSecondary: '#6E6E6E',
 
   // Gradients
-  gradientPrimary: ['#CD865C', '#B35F34'], // React Native
-  gradientSecondary: ['#E8B79D', '#CD865C'],
-  gradientText: ['#31063a', '#ff2b59'],
-  gradientBackground: "linear-gradient(135deg, #CD865C, #B35F34)", // Web CSS
-// Productcard
-  gradientcolor1: "#e77040ff",
-  gradientcolor2: "#e056beff",
-// goldplan
-  gradientcolor3: "#f59140d3",
-  gradientcolor4: "#d11616ef",
+  gradientPrimary: ['#C5A572', '#8C6C3F'], // React Native
+  gradientSecondary: ['rgba(197,165,114,0.25)', '#C5A572'],
+  gradientText: ['#2E6F95', '#C62828'], // sapphire → ruby
+  gradientBackground: "linear-gradient(135deg, #C5A572, #8C6C3F)", // Web CSS
+
+  // Productcard
+  gradientcolor1: "#C5A572",   // muted gold
+  gradientcolor2: "#8C6C3F",   // bronze
+
+  // Goldplan
+  gradientcolor3: "#D4AF37",   // classic gold
+  gradientcolor4: "#2E7D32",   // emerald green
 
   // Additional accents
-  accent: '#FFB699',
-  highlight: '#FFD1B3'
+  accent: '#E6A93D',           // amber gold
+  highlight: '#FAF5ED'         // light warm accent
 };

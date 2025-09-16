@@ -1,47 +1,43 @@
-import { Dimensions, StyleSheet } from 'react-native';
-import { verticalScale, scale } from '../../utils/scaling';
-import { colors } from '../../utils';
-import { colors1 } from '../../utils/colors';
+import { StyleSheet, Dimensions } from 'react-native';
+import appTheme from '../../utils/Theme';
 
+const { COLORS, SIZES, FONTS } = appTheme;
 const { height, width } = Dimensions.get('window');
 
-const styles = StyleSheet.create({
+export default StyleSheet.create({
   footerContainer: {
     width,
     height: height * 0.08,
     flexDirection: 'row',
-    backgroundColor: colors.white,
+    backgroundColor: COLORS.white,
     justifyContent: 'space-between',
     alignItems: 'center',
-    // borderTopWidth: 1,
-    // borderTopColor: colors.lightGray,
-    // paddingHorizontal: scale(10),
-    
   },
   footerBtnContainer: {
     width: '25%',
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-  
   },
   imgContainer: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   activeText: {
-    marginTop: verticalScale(4),
-    color: colors1.primaryText,
-    fontSize: 14,
-
-    fontWeight: 'bold',
+    marginTop: SIZES.margin / 2,
+    color: COLORS.title,
+    fontSize: SIZES.font,
+    fontFamily: FONTS.font.fontFamily,
+    lineHeight: FONTS.font.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
   },
   inactiveText: {
-    marginTop: verticalScale(4),
-    color: colors.darkGrayText,
-    fontSize: 12,
-  
-    fontWeight: 'bold',
+    marginTop: SIZES.margin / 2,
+    color: COLORS.textLight,
+    fontSize: SIZES.fontSm,
+    fontFamily: FONTS.fontSm.fontFamily,
+    lineHeight: FONTS.fontSm.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
   },
   profileContainer: {
     width: '100%',
@@ -50,38 +46,37 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profileBadge: {
-    width: verticalScale(8),
-    height: verticalScale(8),
+    width: SIZES.radius,
+    height: SIZES.radius,
     position: 'absolute',
     right: '25%',
     top: 0,
-    backgroundColor: colors.greenColor,
-    borderRadius: verticalScale(4),
+    backgroundColor: COLORS.success,
+    borderRadius: SIZES.radius_sm,
   },
   badgeContainer: {
     position: 'absolute',
-    top: -scale(5),
-    right: -scale(10),
-    backgroundColor: colors.redColor,
-    borderRadius: scale(10),
-    height: scale(16),
-    width: scale(16),
+    top: -SIZES.margin / 2,
+    right: -SIZES.margin / 2,
+    backgroundColor: COLORS.danger,
+    borderRadius: SIZES.radius,
+    height: SIZES.font,
+    width: SIZES.font,
     justifyContent: 'center',
     alignItems: 'center',
   },
   badgeText: {
-    color: colors.white,
-    fontSize: scale(10),
-    fontWeight: 'bold',
+    color: COLORS.white,
+    fontSize: SIZES.fontXs,
+    fontFamily: FONTS.fontXs.fontFamily,
+    lineHeight: FONTS.fontXs.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
   },
   iconContainer: {
     width: 50,
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 25, // Rounded container for the icons.
-   
+    borderRadius: 25,
   },
 });
-
-export default styles;

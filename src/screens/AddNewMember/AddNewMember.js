@@ -792,43 +792,43 @@ const AddNewMember = () => {
         fetchTransactionTypes();
     }, []);
 
-    useEffect(() => {
-        const fetchAmountForScheme = async (schemeId) => {
-            if (!schemeId || selectedSchemeId === 7) {
-                setAmounts([]);
-                setAmount('');
-                setSelectedGroupCodeObj(null);
-                setSelectedCurrentRegNoObj(null);
-                return;
-            }
-            setLoading(true);
-            try {
-                const response = await fetch(`${API_BASE_URL}/v1/api/member/schemeid?schemeId=${schemeId}`);
-                const data = await response.json();
-                if (data.length === 0) {
-                    setAmounts([]);
-                    setAmount('');
-                    return;
-                }
-                const mappedAmounts = data.map(item => ({
-                    label: item.GROUPCODE,
-                    value: item.AMOUNT.toString(),
-                    groupCode: item.GROUPCODE,
-                    currentRegNo: item.CURRENTREGNO,
-                }));
-                setAmounts(mappedAmounts);
-                setAmount(mappedAmounts[0]?.value || '');
-                setSelectedGroupCodeObj(mappedAmounts[0]?.groupCode || '');
-                setSelectedCurrentRegNoObj(mappedAmounts[0]?.currentRegNo || '');
-            } catch (error) {
-                console.error('Error fetching amounts:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    // useEffect(() => {
+    //     const fetchAmountForScheme = async (schemeId) => {
+    //         if (!schemeId || selectedSchemeId === 7) {
+    //             setAmounts([]);
+    //             setAmount('');
+    //             setSelectedGroupCodeObj(null);
+    //             setSelectedCurrentRegNoObj(null);
+    //             return;
+    //         }
+    //         setLoading(true);
+    //         try {
+    //             const response = await fetch(`${API_BASE_URL}/v1/api/member/schemeid?schemeId=${schemeId}`);
+    //             const data = await response.json();
+    //             if (data.length === 0) {
+    //                 setAmounts([]);
+    //                 setAmount('');
+    //                 return;
+    //             }
+    //             const mappedAmounts = data.map(item => ({
+    //                 label: item.GROUPCODE,
+    //                 value: item.AMOUNT.toString(),
+    //                 groupCode: item.GROUPCODE,
+    //                 currentRegNo: item.CURRENTREGNO,
+    //             }));
+    //             setAmounts(mappedAmounts);
+    //             setAmount(mappedAmounts[0]?.value || '');
+    //             setSelectedGroupCodeObj(mappedAmounts[0]?.groupCode || '');
+    //             setSelectedCurrentRegNoObj(mappedAmounts[0]?.currentRegNo || '');
+    //         } catch (error) {
+    //             console.error('Error fetching amounts:', error);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
 
-        if (selectedSchemeId) fetchAmountForScheme(selectedSchemeId);
-    }, [selectedSchemeId]);
+    //     if (selectedSchemeId) fetchAmountForScheme(selectedSchemeId);
+    // }, [selectedSchemeId]);
 
     const handleSubmit = async () => {
         if (isSubmitting) return;
@@ -871,8 +871,8 @@ const AddNewMember = () => {
         if (selectedSchemeId === 7) {
             createSchemeSummary = {
                 schemeId: selectedSchemeId,
-                groupCode: 'DG' + (Math.random() * 100000).toFixed(0),
-                regNo: 'DGREG' + (Math.random() * 100000).toFixed(0),
+                groupCode: 'DGA',
+                regNo:(Math.random() * 100000).toFixed(0),
                 joinDate: new Date().toISOString().slice(0, 19).replace('T', ' '),
                 upDateTime2: new Date().toISOString().slice(0, 19).replace('T', ' '),
                 openingDate: new Date().toISOString().slice(0, 19).replace('T', ' '),

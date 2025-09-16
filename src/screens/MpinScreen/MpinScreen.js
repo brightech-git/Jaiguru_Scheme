@@ -4,8 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
   Image,
   ImageBackground,
   KeyboardAvoidingView,
@@ -16,11 +14,7 @@ import {
   Easing
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TextDefault } from '../../components';
-import { alignment, colors } from '../../utils';
-import { colors1 } from '../../utils/colors';
-
-const { width, height } = Dimensions.get('window');
+import styles from './MpinStyles';
 
 // Toast function for iOS
 const showToast = (message) => {
@@ -150,7 +144,6 @@ function MpinScreen({ route, navigation }) {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-          {/* Logo Section */}
           <View style={styles.logoContainer}>
             <View style={styles.logoCard}>
               <View style={styles.logoRow}>
@@ -158,35 +151,24 @@ function MpinScreen({ route, navigation }) {
                   source={require('../../assets/logo2.png')}
                   style={styles.logoImage}
                 />
-                <TextDefault style={styles.logoText}>BMG Jewellers Pvt Ltd</TextDefault>
+                <Text style={styles.logoText}>Jaiguru Jewellers </Text>
               </View>
-              <TextDefault style={styles.subtitleText}>
-                (GOLD | SILVER | DIAMOND)
-              </TextDefault>
+              <Text style={styles.subtitleText}>(GOLD | SILVER | DIAMOND)</Text>
             </View>
           </View>
-
-          {/* Content Section */}
           <View style={styles.contentContainer}>
             <View style={styles.headerSection}>
-              <TextDefault style={styles.title}>Create MPIN</TextDefault>
-              <TextDefault style={styles.description}>
-                Set up a secure 4-digit PIN for quick access
-              </TextDefault>
+              <Text style={styles.title}>Create MPIN</Text>
+              <Text style={styles.description}>Set up a secure 4-digit PIN for quick access</Text>
             </View>
-
             <View style={styles.mpinSection}>
-              <TextDefault style={styles.mpinLabel}>Enter 4-Digit MPIN</TextDefault>
-              
+              <Text style={styles.mpinLabel}>Enter 4-Digit MPIN</Text>
               <View style={styles.mpinContainer}>
                 {mpin.map((digit, index) => (
                   <View key={index} style={styles.mpinInputWrapper}>
                     <TextInput
                       ref={(ref) => (inputRefs.current[index] = ref)}
-                      style={[
-                        styles.mpinInput,
-                        digit ? styles.mpinInputFilled : {},
-                      ]}
+                      style={[styles.mpinInput, digit ? styles.mpinInputFilled : {}]}
                       maxLength={1}
                       keyboardType="numeric"
                       value={digit}
@@ -201,32 +183,25 @@ function MpinScreen({ route, navigation }) {
                 ))}
               </View>
             </View>
-
             <View style={styles.actionSection}>
-              <TouchableOpacity 
-                onPress={handleForgotMpin}
-                style={styles.forgotButton}
-              >
-                <TextDefault style={styles.forgotText}>
-                  Forgot MPIN?
-                </TextDefault>
+              <TouchableOpacity onPress={handleForgotMpin} style={styles.forgotButton}>
+                <Text style={styles.forgotText}>Forgot MPIN?</Text>
               </TouchableOpacity>
-
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[
                   styles.createButton,
                   mpin.join('').length === 4 ? styles.createButtonActive : {},
                   isLoading ? styles.createButtonLoading : {}
-                ]} 
+                ]}
                 onPress={handleCreateMpin}
                 disabled={mpin.join('').length !== 4 || isLoading}
               >
-                <TextDefault style={[
+                <Text style={[
                   styles.createButtonText,
                   mpin.join('').length === 4 ? styles.createButtonTextActive : {}
                 ]}>
                   {isLoading ? 'Creating...' : 'Create MPIN'}
-                </TextDefault>
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -327,13 +302,16 @@ function VerifyMpinScreen({ navigation }) {
   };
 
   return (
+    <ImageBackground
+      source={require('../../assets/bg.jpg')}
+      style={styles.backgroundImage}
+    >
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-          {/* Logo Section */}
           <View style={styles.logoContainer}>
             <View style={styles.logoCard}>
               <View style={styles.logoRow}>
@@ -341,35 +319,24 @@ function VerifyMpinScreen({ navigation }) {
                   source={require('../../assets/logo2.png')}
                   style={styles.logoImage}
                 />
-                <TextDefault style={styles.logoText}>BMG Jewellers Pvt Ltd</TextDefault>
+                <Text style={styles.logoText}>Jaiguru Jewellers Pvt Ltd</Text>
               </View>
-              <TextDefault style={styles.subtitleText}>
-                (GOLD | SILVER | DIAMOND)
-              </TextDefault>
+              <Text style={styles.subtitleText}>(GOLD | SILVER | DIAMOND)</Text>
             </View>
           </View>
-
-          {/* Content Section */}
           <View style={styles.contentContainer}>
             <View style={styles.headerSection}>
-              <TextDefault style={styles.title}>Enter Your MPIN</TextDefault>
-              <TextDefault style={styles.description}>
-                Enter your 4-digit PIN to continue
-              </TextDefault>
+              <Text style={styles.title}>Enter Your MPIN</Text>
+              <Text style={styles.description}>Enter your 4-digit PIN to continue</Text>
             </View>
-
             <View style={styles.mpinSection}>
-              <TextDefault style={styles.mpinLabel}>MPIN</TextDefault>
-              
+              <Text style={styles.mpinLabel}>MPIN</Text>
               <View style={styles.mpinContainer}>
                 {mpin.map((digit, index) => (
                   <View key={index} style={styles.mpinInputWrapper}>
                     <TextInput
                       ref={(ref) => (inputRefs.current[index] = ref)}
-                      style={[
-                        styles.mpinInput,
-                        digit ? styles.mpinInputFilled : {},
-                      ]}
+                      style={[styles.mpinInput, digit ? styles.mpinInputFilled : {}]}
                       maxLength={1}
                       keyboardType="numeric"
                       value={digit}
@@ -383,243 +350,36 @@ function VerifyMpinScreen({ navigation }) {
                   </View>
                 ))}
               </View>
-
               {attempts > 0 && (
-                <TextDefault style={styles.attemptsText}>
-                  Attempts remaining: {3 - attempts}
-                </TextDefault>
+                <Text style={styles.attemptsText}>Attempts remaining: {3 - attempts}</Text>
               )}
             </View>
-
             <View style={styles.actionSection}>
-              <TouchableOpacity 
-                onPress={() => navigation.navigate('OTP')}
-                style={styles.forgotButton}
-              >
-                <TextDefault style={styles.forgotText}>
-                  Forgot MPIN?
-                </TextDefault>
+              <TouchableOpacity onPress={() => navigation.navigate('OTP')} style={styles.forgotButton}>
+                <Text style={styles.forgotText}>Forgot MPIN?</Text>
               </TouchableOpacity>
-
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[
                   styles.createButton,
                   mpin.join('').length === 4 ? styles.createButtonActive : {},
                   isLoading ? styles.createButtonLoading : {}
-                ]} 
+                ]}
                 onPress={handleVerifyMpin}
                 disabled={mpin.join('').length !== 4 || isLoading}
               >
-                <TextDefault style={[
+                <Text style={[
                   styles.createButtonText,
                   mpin.join('').length === 4 ? styles.createButtonTextActive : {}
                 ]}>
                   {isLoading ? 'Verifying...' : 'Verify MPIN'}
-                </TextDefault>
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         </Animated.View>
       </KeyboardAvoidingView>
-   
+    </ImageBackground>
   );
 }
-
-const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
-  keyboardContainer: {
-    flex: 1,
-     backgroundColor: colors1.background,
-  },
-  container: {
-    flex: 1,
-   
-    alignItems: 'center',
-    marginTop: 60,
-  },
-  
-  // Logo Section
-  logoContainer: {
-    alignItems: 'center',
-    paddingTop: Platform.OS === 'ios' ? 40 : 20,
-    paddingBottom: 20,
-  },
-  logoCard: {
-    backgroundColor: colors1.cardBackground,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: colors1.borderLight,
-  },
-  logoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  logoImage: {
-    width: 40,
-    height: 30,
-    marginRight: 10,
-    borderRadius: 6,
-  },
-  logoText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors1.primaryText,
-    letterSpacing: 0.8,
-  },
-  subtitleText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors1.textSecondary,
-    letterSpacing: 1.5,
-    opacity: 0.8,
-  },
-
-  // Content Section
-  contentContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    alignItems: 'center',
-  },
-  headerSection: {
-    alignItems: 'center',
-    marginBottom: 30,
-    marginTop: 30,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: colors1.textPrimary,
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  description: {
-    fontSize: 14,
-    color: colors1.textSecondary,
-    textAlign: 'center',
-    opacity: 0.8,
-  },
-
-  // MPIN Section
-  mpinSection: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  mpinLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors1.textPrimary,
-    marginBottom: 16,
-    alignSelf: 'flex-start',
-    marginLeft: 6,
-  },
-  mpinContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  mpinInputWrapper: {
-    marginHorizontal: 6,
-    position: 'relative',
-  },
-  mpinInput: {
-    width: 55,
-    height: 65,
-    borderWidth: 2,
-    borderColor: colors1.borderLight,
-    borderRadius: 14,
-    fontSize: 22,
-    fontWeight: 'bold',
-    backgroundColor: colors1.cardBackground,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    textAlign: 'center',
-    color: colors1.textPrimary,
-  },
-  mpinInputFilled: {
-    borderColor: colors1.primary,
-    backgroundColor: colors1.cardBackground,
-    shadowColor: colors1.primary,
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 4,
-  },
-  filledIndicator: {
-    position: 'absolute',
-    bottom: -6,
-    left: '50%',
-    marginLeft: -3,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors1.primary,
-  },
-  attemptsText: {
-    fontSize: 13,
-    color: colors1.error,
-    fontWeight: '500',
-    marginTop: 6,
-  },
-
-  // Action Section
-  actionSection: {
-    paddingBottom: Platform.OS === 'ios' ? 20 : 10,
-    alignItems: 'center',
-  },
-  forgotButton: {
-    paddingVertical: 10,
-    marginBottom: 10,
-  },
-  forgotText: {
-    color: colors1.primary,
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  createButton: {
-    backgroundColor: colors1.borderLight,
-    paddingVertical: 16,
-    borderRadius: 14,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    width: 300,
-  },
-  createButtonActive: {
-    backgroundColor: colors1.primary,
-    shadowColor: colors1.primaryDark,
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  createButtonLoading: {
-    opacity: 0.7,
-  },
-  createButtonText: {
-    color: colors1.textSecondary,
-    fontSize: 17,
-    fontWeight: 'bold',
-  },
-  createButtonTextActive: {
-    color: colors1.textLight,
-  },
-});
 
 export { MpinScreen, VerifyMpinScreen };

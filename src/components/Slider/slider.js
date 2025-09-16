@@ -10,34 +10,26 @@ import {
   Linking,
   ActivityIndicator
 } from 'react-native';
+import { COLORS, SIZES, FONTS } from '../../utils/Theme';
 
 const { width } = Dimensions.get('window');
-
-const colors = {
-  primary: '#CD865C',
-  primaryDark: '#B35F34',
-  primaryLight: '#E8B79D',
-  background: '#FFF9F6',
-  shadow: 'rgba(179, 95, 52, 0.3)',
-  cardBackground: '#FFFFFF',
-};
 
 // Define your desired fallback URLs
 const FALLBACK_BANNERS = [
   {
     id: 1,
     image_path: '/images/banner1.jpg',
-    url: 'https://bmgjewellers.com/shop-left?itemName=EARRINGS'
+    url: 'https://jaigurujewellers.com/gold/thali-chain'
   },
   {
     id: 2,
     image_path: '/images/banner2.jpg',
-    url: 'https://bmgjewellers.com/shop-left?itemName=NECKLACES'
+    url: 'https://jaigurujewellers.com/products'
   },
   {
     id: 3,
     image_path: '/images/banner3.jpg',
-    url: 'https://bmgjewellers.com/shop-left?itemName=FESTIVAL'
+    url: 'https://jaigurujewellers.com/gold/ladies-braclet'
   }
 ];
 
@@ -58,8 +50,6 @@ export default function EnhancedSlider() {
         const response = await fetch('https://app.bmgjewellers.com/api/v1/App_banner/list');
         const data = await response.json();
         
-        // console.log('API Response:', data); // Debug log
-        
         // Map API data to use your desired fallback URLs
         const bannersWithUrls = data.map((banner, index) => {
           // Use the corresponding fallback URL based on index
@@ -74,13 +64,11 @@ export default function EnhancedSlider() {
           };
         });
         
-        // console.log('Processed banners:', bannersWithUrls); // Debug log
         setBanners(bannersWithUrls);
       } catch (error) {
         console.error('Error fetching banners:', error);
         
         // Use fallback data in case API fails
-        // console.log('Using fallback banners:', FALLBACK_BANNERS);
         setBanners(FALLBACK_BANNERS);
       } finally {
         setLoading(false);
@@ -128,14 +116,12 @@ export default function EnhancedSlider() {
   };
 
   const handleBannerPress = (url) => {
-    console.log('Opening URL:', url); // Debug log
     // Directly open the URL in the device's browser
     Linking.openURL(url).catch(err => console.error('Failed to open URL:', err));
   };
 
   const renderSliderItem = ({ item }) => {
     const imageUrl = `https://app.bmgjewellers.com${item.image_path}`;
-    // console.log('Image URL:', imageUrl, 'Target URL:', item.url); // Debug log
     
     return (
       <TouchableOpacity
@@ -194,7 +180,7 @@ export default function EnhancedSlider() {
   if (loading) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -240,33 +226,33 @@ export default function EnhancedSlider() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background,
-    marginVertical: 10,
+    backgroundColor: COLORS.background,
+    marginVertical: SIZES.margin / 2,
     position: 'relative',
   },
   sliderItem: {
     width: width,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 15,
+    paddingHorizontal: SIZES.padding,
   },
   imageContainer: {
     width: '95%',
     height: 200,
-    borderRadius: 20,
+    borderRadius: SIZES.radius_lg,
     overflow: 'hidden',
     position: 'relative',
     elevation: 8,
-    shadowColor: colors.shadow,
+    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
-    backgroundColor: colors.cardBackground,
+    backgroundColor: COLORS.cardBackground,
   },
   sliderImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 20,
+    borderRadius: SIZES.radius_lg,
   },
   overlay: {
     position: 'absolute',
@@ -275,25 +261,25 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    borderRadius: 20,
+    borderRadius: SIZES.radius_lg,
   },
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 15,
-    marginBottom: 8,
-    paddingHorizontal: 20,
+    marginTop: SIZES.margin,
+    marginBottom: SIZES.margin / 2,
+    paddingHorizontal: SIZES.padding,
   },
   paginationDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.primaryLight,
+    backgroundColor: COLORS.primaryLight,
     marginHorizontal: 4,
   },
   paginationDotActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: COLORS.primary,
     width: 16,
     borderRadius: 8,
   },

@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "jai",
-    "slug": "jai",
+    "name": "Jaiguru DigiGold",
+    "slug": "jaiguru-scheme",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -16,17 +16,25 @@
       "supportsTablet": true
     },
     "android": {
+
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.brightechsoftware.jaiguruscheme"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/icon.png"
     },
     "plugins": [
       "expo-localization"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "411bf892-e799-4f06-8869-5c04a094db32"
+      }
+    },
+    "owner": "brightechsoftware"
   }
 }

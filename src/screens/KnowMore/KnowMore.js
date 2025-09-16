@@ -28,7 +28,7 @@ function KnowMore() {
         <Text style={styles.title}>DIGIGOLD SCHEME</Text>
 
         <Text style={styles.description}>
-          Choose DigiGold because it offers a convenient and flexible way to save in gold through a mobile app, providing tiered benefits that allow users to earn additional gold weight on their savings. DigiGold is an ideal choice for customers seeking a secure and accessible investment in gold, with the option to redeem their savings for attractive gold jewellery at BMG Jewellers.
+          Choose DigiGold because it offers a convenient and flexible way to save in gold through a mobile app, providing tiered benefits that allow users to earn additional gold weight on their savings. DigiGold is an ideal choice for customers seeking a secure and accessible investment in gold, with the option to redeem their savings for attractive gold jewellery at Jaiguru Jewellers.
         </Text>
 
         <Text style={styles.sectionTitle}>Process to Join:</Text>
@@ -56,7 +56,7 @@ function KnowMore() {
         <Text style={styles.sectionTitle}>Process to Redeem:</Text>
         <View style={styles.stepContainerWithCircle}>
           <DottedCircle iconName="storefront-outline" />
-          <Text style={styles.description1}>Visit BMG Jewellery</Text>
+          <Text style={styles.description1}>Visit Jaiguru Jewellery</Text>
         </View>
         <View style={styles.stepContainerWithCircle}>
           <DottedCircle iconName="form-select" />
@@ -92,7 +92,7 @@ function KnowMore() {
 
         <Text style={styles.subHeading}>Redemption:</Text>
         <Text style={styles.description}>
-          Saved gold weight can be redeemed and purchased as gold jewellery at any of BMG stores located across Tamil Nadu or online by sending an email to digigoldsupport@bmg.com. Users must pay for GST and any value-added charges such as wastage charges, marking charges, stone charges, and hallmark charges, if applicable.
+          Saved gold weight can be redeemed and purchased as gold jewellery at any of Jaiguru stores located across Tamil Nadu or online by sending an email to digigoldsupport@jaiguru.com. Users must pay for GST and any value-added charges such as wastage charges, marking charges, stone charges, and hallmark charges, if applicable.
         </Text>
         <Text style={styles.description}>
           There is a minimum lock-in period of 30 days, during which users cannot redeem their savings. Only the person whose name was used at the time of registration can redeem the scheme, and they must submit original identification proof such as Aadhaar, PAN, driving license, or voter ID at the time of redemption. Users must redeem their scheme within 35 days from the date of maturity.

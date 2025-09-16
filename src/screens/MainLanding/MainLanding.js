@@ -372,8 +372,8 @@ function MainLanding() {
               />
             </View>
             <View style={styles.companyNameContainer}>
-              <Text style={styles.companyName}>BMG JEWELLERS</Text>
-              <Text style={styles.companySubtitle}>Pvt Ltd</Text>
+              <Text style={styles.companyName}>Jaiguru Jewellers</Text>
+              {/* <Text style={styles.companySubtitle}>Pvt Ltd</Text> */}
             </View>
           </View>
 
@@ -442,11 +442,11 @@ function MainLanding() {
 
         <View style={styles.contentWrapper}>
           <Text style={styles.contentText}>
-            Welcome to the Digital home of BMG Jewellers:
+            Welcome to the Digital home of Jaiguru Jewellers:
           </Text>
           <Text style={styles.contentText1}>
             The ideal place to join a savings scheme and save up to buy your
-            dream jewels. BMG DIGIGOLD empowers you to save and buy jewels
+            dream jewels. Jaiguru DIGIGOLD empowers you to save and buy jewels
             conveniently in the palm of your hand. Start saving in gold from
             today.
           </Text>

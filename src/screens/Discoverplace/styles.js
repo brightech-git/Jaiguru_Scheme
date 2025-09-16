@@ -1,98 +1,103 @@
-// Updated styles.js
 import { StyleSheet } from 'react-native';
-import { colors } from '../../utils/colors';
-import { alignment } from '../../utils';
+import appTheme from '../../utils/Theme';
 
+const { COLORS, SIZES, FONTS } = appTheme;
 
-const styles = StyleSheet.create({
+export default StyleSheet.create({
   mainBackground: {
     flex: 1,
     width: '100%',
     height: '100%',
   },
   backgroundImageStyle: {
-    opacity: 0.9, // Adjust opacity as needed
+    opacity: 0.9,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: COLORS.white,
   },
   safeArea: {
     flex: 1,
   },
   backButton: {
     position: 'absolute',
-    top: 10,
-    left: 15,
+    top: SIZES.padding / 1.5,
+    left: SIZES.padding,
     zIndex: 1,
-    padding: 10,
+    padding: SIZES.padding / 1.5,
   },
   titleContainer: {
     alignItems: 'center',
-    marginTop: 60,
-    marginBottom: 20,
+    marginTop: SIZES.margin * 4,
+    marginBottom: SIZES.margin,
   },
   titleText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.textColor,
+    fontSize: SIZES.h4,
+    fontFamily: FONTS.h4.fontFamily,
+    lineHeight: FONTS.h4.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
+    color: COLORS.title,
   },
   scrollViewContentContainer: {
     flexGrow: 1,
-    paddingHorizontal: 15,
-    paddingBottom: 20,
+    paddingHorizontal: SIZES.padding,
+    paddingBottom: SIZES.margin,
   },
   scrollView: {
     flex: 1,
   },
   titleSpacer: {
-    marginTop: 10,
+    marginTop: SIZES.margin / 1.5,
   },
   scrollContainer: {
-    paddingVertical: 20,
-    padding:20
+    paddingVertical: SIZES.margin,
+    padding: SIZES.padding,
   },
   grayContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
+    paddingHorizontal: SIZES.padding / 1.5,
   },
   card: {
     width: '48%',
-    backgroundColor: colors.white,
-    marginVertical: 10,
-    borderRadius: 10,
-    shadowColor: '#000',
+    backgroundColor: COLORS.card,
+    marginVertical: SIZES.margin / 1.5,
+    borderRadius: SIZES.radius_lg,
+    shadowColor: COLORS.dark,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 5,
     alignItems: 'center',
-    padding: 10,
+    padding: SIZES.padding / 1.5,
   },
   cardImage: {
     width: '100%',
     height: 120,
-    borderRadius: 10,
+    borderRadius: SIZES.radius_lg,
   },
   cardTitle: {
-    marginTop: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.black,
-    alignSelf: 'flex-start', // Aligns the title to the left
+    marginTop: SIZES.margin / 1.5,
+    fontSize: SIZES.fontLg,
+    fontFamily: FONTS.fontLg.fontFamily,
+    lineHeight: FONTS.fontLg.lineHeight,
+    fontWeight: FONTS.heading.fontWeight,
+    color: COLORS.title,
+    alignSelf: 'flex-start',
   },
   subtitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
-    alignSelf: 'flex-start', // Aligns the subtitle container to the left
+    marginTop: SIZES.margin / 2,
+    alignSelf: 'flex-start',
   },
   cardSubtitle: {
-    fontSize: 14,
-    color: colors.fontThirdColor,
-    marginLeft: 5, // Adds space between icon and text
+    fontSize: SIZES.font,
+    fontFamily: FONTS.font.fontFamily,
+    lineHeight: FONTS.font.lineHeight,
+    color: COLORS.textLight,
+    marginLeft: SIZES.margin / 2,
   },
   bottomTab: {
     position: 'absolute',
@@ -103,44 +108,43 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    marginVertical: 10,
-    paddingHorizontal: 10,
+    marginVertical: SIZES.margin / 1.5,
+    paddingHorizontal: SIZES.padding / 1.5,
   },
   tripButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.lightpink,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 8,
+    backgroundColor: COLORS.primaryLight,
+    paddingVertical: SIZES.padding / 1.5,
+    paddingHorizontal: SIZES.padding / 2,
+    borderRadius: SIZES.radius,
   },
   tripButtonText: {
-    fontSize: 13,
-    color: colors.fontMainColor,
-    marginRight: 5, // Adds space between text and icon
-    fontWeight: 'bold'
+    fontSize: SIZES.fontSm,
+    fontFamily: FONTS.fontSm.fontFamily,
+    lineHeight: FONTS.fontSm.lineHeight,
+    color: COLORS.text,
+    marginRight: SIZES.margin / 2,
+    fontWeight: FONTS.heading.fontWeight,
   },
   title: {
-    ...alignment.PxSmall,
-    ...alignment.PLxSmall,
-    fontWeight: 'bold',
-    fontSize: 17, // Ensure the font size is visible enough
-    color: colors.greenColor, // Add color for better visibility if needed
-},
-likeIconContainer: {
-  position: 'absolute',
-  top: 15, // Adjust to position inside the card
-  right: 15, // Adjust to position inside the card
-  width: 30,
-  height: 30,
-  borderRadius: 15,
-  backgroundColor: 'rgba(255, 255, 255, 0.5)',// Transparent black (50% opacity)
-  justifyContent: 'center',
-  alignItems: 'center',
-  zIndex: 1, // Ensures it stays above other elements
-},
-
-
+    paddingHorizontal: SIZES.padding / 2,
+    fontWeight: FONTS.heading.fontWeight,
+    fontSize: SIZES.h5,
+    fontFamily: FONTS.h5.fontFamily,
+    lineHeight: FONTS.h5.lineHeight,
+    color: COLORS.success,
+  },
+  likeIconContainer: {
+    position: 'absolute',
+    top: SIZES.padding,
+    right: SIZES.padding,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: COLORS.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
 });
-
-export default styles;

@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { scale, verticalScale } from '../../utils/scaling';
 
 
-// BMG Jewellers specific colors
+
 const bmgColors = {
   primary: '#D4AF37', // Gold primary color
   primaryDark: '#B8860B', // Dark gold
@@ -85,7 +85,7 @@ const PrivacyPolicyPage = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Header with BMG Logo */}
+          {/* Header with Jaiguru Logo */}
           <LinearGradient
             colors={[bmgColors.primary, bmgColors.primaryDark]}
             start={{ x: 0, y: 0 }}
@@ -105,7 +105,7 @@ const PrivacyPolicyPage = () => {
           {/* Introduction */}
           <View style={styles.introCard}>
             <Text style={styles.introText}>
-              At BMG Jewellers, we value your privacy and are committed to protecting your personal information. 
+              At Jaiguru Jewellers, we value your privacy and are committed to protecting your personal information. 
               This policy outlines how we collect, use, and safeguard your data.
             </Text>
           </View>
@@ -149,8 +149,8 @@ const PrivacyPolicyPage = () => {
               </View>
               <View style={styles.infoContent}>
                 <Text style={styles.infoItemTitle}>Website</Text>
-                <TouchableOpacity onPress={() => handleExternalLink("https://bmgjewellers.com")}>
-                  <Text style={styles.link}>https://bmgjewellers.com</Text>
+                <TouchableOpacity onPress={() => handleExternalLink("https://jaigurujewellers.com/")}>
+                  <Text style={styles.link}>https://jaigurujewellers.com/</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -161,7 +161,7 @@ const PrivacyPolicyPage = () => {
               </View>
               <View style={styles.infoContent}>
                 <Text style={styles.infoItemTitle}>Contact</Text>
-                <Text style={styles.infoItemContent}>For privacy-related questions, please contact our support team at Contact@bmgjewellers.in</Text>
+                <Text style={styles.infoItemContent}>For privacy-related questions, please contact our support team at Contact@jaigurujewellers.in</Text>
               </View>
             </View>
             
@@ -191,7 +191,7 @@ const PrivacyPolicyPage = () => {
 
           {/* Copyright */}
           <View style={styles.copyright}>
-            <Text style={styles.copyrightText}>© {new Date().getFullYear()} BMG Jewellers. All rights reserved.</Text>
+            <Text style={styles.copyrightText}>© {new Date().getFullYear()} Jaiguru Jewellers. All rights reserved.</Text>
           </View>
         </ScrollView>
       </LinearGradient>
